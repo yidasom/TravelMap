@@ -171,6 +171,6 @@ application-local.yml
 application-dev.yml
 application-prod.yml 
 
-*.properties
-
 Settings.md
+
+ddl_script.sql

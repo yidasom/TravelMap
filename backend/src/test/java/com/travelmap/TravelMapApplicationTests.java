@@ -1,4 +1,4 @@
-package com.travelmap.backend;
+package com.travelmap;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

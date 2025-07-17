@@ -1,0 +1,71 @@
+version: '3.8'
+
+services:
+  # PostgreSQL 데이터베이스
+  postgres:
+    image: postgres:16
+    container_name: travelmap-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: travelmap
+      POSTGRES_USER: travelmap
+      POSTGRES_PASSWORD: travelmap
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
+    #   - ./docker/postgres/postgresql.conf:/etc/postgresql/postgresql.conf
+    # command: postgres -c config_file=/etc/postgresql/postgresql.conf
+    networks:
+      - travelmap-network
+
+  # Spring Boot 백엔드
+  # backend:
+  #   build:
+  #     context: ./backend
+  #     dockerfile: Dockerfile
+  #   container_name: travelmap-backend
+  #   restart: unless-stopped
+  #   environment:
+  #     SPRING_PROFILES_ACTIVE: docker
+  #     SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/travelmap
+  #     SPRING_DATASOURCE_USERNAME: travelmap
+  #     SPRING_DATASOURCE_PASSWORD: travelmap123
+  #     YOUTUBE_API_KEY: ${YOUTUBE_API_KEY:-your-youtube-api-key-here}
+  #   ports:
+  #     - "8080:8080"
+  #   depends_on:
+  #     - postgres
+  #   networks:
+  #     - travelmap-network
+  #   volumes:
+  #     - backend_logs:/app/logs
+
+  # # React 프론트엔드
+  # frontend:
+  #   build:
+  #     context: ./frontend
+  #     dockerfile: Dockerfile
+  #   container_name: travelmap-frontend
+  #   restart: unless-stopped
+  #   environment:
+  #     REACT_APP_API_URL: http://localhost:8080/api
+  #   ports:
+  #     - "3000:3000"
+  #   depends_on:
+  #     - backend
+  #   networks:
+  #     - travelmap-network
+
+# 네트워크 설정
+networks:
+  travelmap-network:
+    driver: bridge
+
+# 볼륨 설정
+volumes:
+  postgres_data:
+    driver: local
+  backend_logs:
+    driver: local 

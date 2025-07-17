@@ -1,0 +1,50 @@
+plugins {
+	id 'java'
+	id 'org.springframework.boot' version '3.4.0'
+	id 'io.spring.dependency-management' version '1.1.6'
+}
+
+group = 'com.travelmap'
+version = '0.0.1-SNAPSHOT'
+
+java {
+	toolchain {
+		languageVersion = JavaLanguageVersion.of(19)
+	}
+}
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.springframework.boot:spring-boot-starter-webflux'
+	
+	// YouTube API
+	implementation 'com.google.apis:google-api-services-youtube:v3-rev20240814-2.0.0'
+	implementation 'com.google.auth:google-auth-library-oauth2-http:1.19.0'
+	
+	// OCR 
+	implementation 'net.sourceforge.tess4j:tess4j:5.8.0'
+	
+	// JSON Processing
+	implementation 'org.springframework.boot:spring-boot-starter-json'
+	
+	// Scheduling
+	implementation 'org.springframework.boot:spring-boot-starter-quartz'
+	
+	// Development
+	developmentOnly 'org.springframework.boot:spring-boot-devtools'
+	runtimeOnly 'org.postgresql:postgresql'
+	
+	// Testing
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+tasks.named('test') {
+	useJUnitPlatform()
+}

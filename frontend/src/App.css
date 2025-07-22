@@ -36,3 +36,146 @@
     transform: rotate(360deg);
   }
 }
+
+/* 지도 반응형 스타일 */
+.responsive-map {
+  height: 100% !important;
+  width: 100% !important;
+}
+
+/* 지도 이동의 부드러움을 위한 CSS */
+.leaflet-container {
+  cursor: grab !important;
+}
+
+.leaflet-container:active {
+  cursor: grabbing !important;
+}
+
+/* 지도 패닝 시 부드러운 전환 효과 */
+.leaflet-zoom-animated {
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+/* 경계 근처에서의 부드러운 저항감 표현 */
+.leaflet-container.leaflet-touch-drag {
+  -ms-touch-action: pinch-zoom !important;
+  touch-action: pinch-zoom !important;
+}
+
+/* 다양한 화면 크기에 대한 반응형 설정 */
+@media (max-width: 768px) {
+  .responsive-map {
+    height: 50vh !important;
+    min-height: 300px !important;
+  }
+  
+  .leaflet-control-container .leaflet-top.leaflet-right {
+    top: 10px !important;
+    right: 10px !important;
+  }
+  
+  .leaflet-control-container .leaflet-bottom.leaflet-left {
+    bottom: 10px !important;
+    left: 10px !important;
+  }
+  
+  .leaflet-control-zoom {
+    transform: scale(0.9) !important;
+  }
+
+  /* 모바일에서 드래그 성능 향상 */
+  .leaflet-container {
+    -webkit-transform: translate3d(0,0,0) !important;
+    transform: translate3d(0,0,0) !important;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+  .responsive-map {
+    height: 60vh !important;
+    min-height: 400px !important;
+  }
+  
+  .leaflet-control-zoom {
+    transform: scale(1) !important;
+  }
+}
+
+@media (min-width: 1025px) {
+  .responsive-map {
+    height: 70vh !important;
+    min-height: 500px !important;
+  }
+  
+  .leaflet-control-zoom {
+    transform: scale(1.1) !important;
+  }
+}
+
+/* 지도 컨트롤 스타일 개선 */
+.leaflet-control-zoom {
+  border: none !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2) !important;
+}
+
+.leaflet-control-zoom a {
+  background-color: white !important;
+  color: #333 !important;
+  border: 1px solid #ccc !important;
+  font-weight: bold !important;
+}
+
+.leaflet-control-zoom a:hover {
+  background-color: #f5f5f5 !important;
+}
+
+/* 지도 라벨 스타일 개선 */
+.country-label {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif !important;
+  z-index: 1000 !important;
+}
+
+/* 클러스터 마커 스타일 */
+.cluster-marker {
+  z-index: 1000 !important;
+}
+
+/* 모바일에서 라벨 크기 조정 */
+@media (max-width: 768px) {
+  .country-label div {
+    font-size: 10px !important;
+    padding: 2px 4px !important;
+    border-radius: 10px !important;
+  }
+  
+  .cluster-marker div {
+    font-size: 10px !important;
+    min-width: 20px !important;
+    min-height: 20px !important;
+  }
+}
+
+/* 태블릿에서 라벨 크기 조정 */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .country-label div {
+    font-size: 11px !important;
+    padding: 3px 6px !important;
+  }
+  
+  .cluster-marker div {
+    font-size: 11px !important;
+  }
+}
+
+/* 데스크탑에서 라벨 크기 조정 */
+@media (min-width: 1025px) {
+  .country-label div {
+    font-size: 12px !important;
+    padding: 4px 8px !important;
+  }
+  
+  .cluster-marker div {
+    font-size: 12px !important;
+  }
+}

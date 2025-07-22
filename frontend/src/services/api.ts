@@ -30,9 +30,6 @@ export const apiService = {
     if (filters.selectedCountryCode) {
       params.append('countryCode', filters.selectedCountryCode);
     }
-    if (filters.selectedGender) {
-      params.append('gender', filters.selectedGender);
-    }
     if (filters.startDate) {
       params.append('startDate', filters.startDate);
     }
@@ -53,9 +50,6 @@ export const apiService = {
     }
     if (filters.selectedCountryCode) {
       params.append('countryCode', filters.selectedCountryCode);
-    }
-    if (filters.selectedGender) {
-      params.append('gender', filters.selectedGender);
     }
     if (filters.startDate) {
       params.append('startDate', filters.startDate);
@@ -93,9 +87,9 @@ export const dataCollectionApi = {
   },
 
   // 특정 채널 데이터 수집
-  async collectChannelData(channelId: string) {
+  async collectChannelData(searchQuery: string) {
     const response = await api.post('/admin/collect-channel', null, {
-      params: { channelId }
+      params: { searchQuery }
     });
     return response;
   },
@@ -119,9 +113,9 @@ export const dataCollectionApi = {
   },
 
   // 새 채널 추가
-  async addNewChannel(channelId: string, channelName?: string) {
+  async addNewChannel(searchQuery: string, channelName?: string) {
     const params = new URLSearchParams();
-    params.append('channelId', channelId);
+    params.append('searchQuery', searchQuery);
     if (channelName) {
       params.append('channelName', channelName);
     }

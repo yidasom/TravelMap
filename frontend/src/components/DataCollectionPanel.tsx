@@ -56,7 +56,7 @@ const DataCollectionPanel: React.FC = () => {
   });
   
   const [result, setResult] = useState<CollectionResult | null>(null);
-  const [channelId, setChannelId] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
   const [channelName, setChannelName] = useState('');
   const [isExpanded, setIsExpanded] = useState(false);
   const [addChannelOpen, setAddChannelOpen] = useState(false);
@@ -118,17 +118,17 @@ const DataCollectionPanel: React.FC = () => {
   };
   
   const handleCollectChannel = async () => {
-    if (!channelId.trim()) {
+    if (!searchQuery.trim()) {
       setResult({
         status: 'error',
-        message: '채널 ID를 입력해주세요.'
+        message: '검색 쿼리를 입력해주세요.'
       });
       return;
     }
     
     try {
       setResult(null);
-      const response = await dataCollectionApi.collectChannelData(channelId);
+      const response = await dataCollectionApi.collectChannelData(searchQuery);
       setResult(response.data);
     } catch (error: any) {
       setResult({
@@ -139,20 +139,20 @@ const DataCollectionPanel: React.FC = () => {
   };
   
   const handleAddChannel = async () => {
-    if (!channelId.trim()) {
+    if (!searchQuery.trim()) {
       setResult({
         status: 'error',
-        message: '채널 ID를 입력해주세요.'
+        message: '검색 쿼리를 입력해주세요.'
       });
       return;
     }
     
     try {
       setResult(null);
-      const response = await dataCollectionApi.addNewChannel(channelId, channelName);
+      const response = await dataCollectionApi.addNewChannel(searchQuery, channelName);
       setResult(response.data);
       setAddChannelOpen(false);
-      setChannelId('');
+      setSearchQuery('');
       setChannelName('');
     } catch (error: any) {
       setResult({
@@ -288,10 +288,10 @@ const DataCollectionPanel: React.FC = () => {
           </Typography>
           <Box display="flex" gap={1} alignItems="center">
             <TextField
-              label="채널 ID"
-              value={channelId}
-              onChange={(e) => setChannelId(e.target.value)}
-              placeholder="UC..."
+              label="검색 쿼리"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="채널명 또는 유튜버명"
               size="small"
               sx={{ flexGrow: 1 }}
               disabled={status.isCollecting}
@@ -299,7 +299,7 @@ const DataCollectionPanel: React.FC = () => {
             <Button
               variant="contained"
               onClick={handleCollectChannel}
-              disabled={status.isCollecting || !channelId.trim()}
+              disabled={status.isCollecting || !searchQuery.trim()}
               size="small"
             >
               수집
@@ -314,10 +314,10 @@ const DataCollectionPanel: React.FC = () => {
             <TextField
               autoFocus
               margin="dense"
-              label="채널 ID"
-              value={channelId}
-              onChange={(e) => setChannelId(e.target.value)}
-              placeholder="UC..."
+              label="검색 쿼리"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="채널명 또는 유튜버명"
               fullWidth
               variant="outlined"
               required
@@ -335,7 +335,7 @@ const DataCollectionPanel: React.FC = () => {
             <Button onClick={() => setAddChannelOpen(false)}>취소</Button>
             <Button 
               onClick={handleAddChannel}
-              disabled={!channelId.trim()}
+              disabled={!searchQuery.trim()}
               variant="contained"
             >
               추가

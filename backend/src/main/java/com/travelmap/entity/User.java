@@ -19,9 +19,9 @@ public class User {
     @Column(nullable = false, length = 100)
     private String name;
     
-    @Size(max = 10, message = "성별은 10자를 초과할 수 없습니다")
-    @Column(length = 10)
-    private String gender;
+    @Size(max = 100, message = "검색 쿼리는 100자를 초과할 수 없습니다")
+    @Column(name = "search_query", length = 100)
+    private String searchQuery;
     
     @Column(name = "youtube_channel_id", unique = true, length = 50)
     private String youtubeChannelId;
@@ -67,8 +67,9 @@ public class User {
     // Constructors
     public User() {}
     
-    public User(String name, String youtubeChannelId) {
+    public User(String name, String searchQuery, String youtubeChannelId) {
         this.name = name;
+        this.searchQuery = searchQuery;
         this.youtubeChannelId = youtubeChannelId;
     }
     
@@ -89,12 +90,12 @@ public class User {
         this.name = name;
     }
     
-    public String getGender() {
-        return gender;
+    public String getSearchQuery() {
+        return searchQuery;
     }
     
-    public void setGender(String gender) {
-        this.gender = gender;
+    public void setSearchQuery(String searchQuery) {
+        this.searchQuery = searchQuery;
     }
     
     public String getYoutubeChannelId() {
@@ -182,7 +183,7 @@ public class User {
         return "User{" +
                 "id=" + id +
                 ", name='" + name + '\'' +
-                ", gender='" + gender + '\'' +
+                ", searchQuery='" + searchQuery + '\'' +
                 ", youtubeChannelId='" + youtubeChannelId + '\'' +
                 '}';
     }

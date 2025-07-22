@@ -2,7 +2,7 @@
 export interface User {
   id: number;
   name: string;
-  gender?: string;
+  searchQuery?: string;
   youtubeChannelId: string;
   channelUrl: string;
   profileImageUrl?: string;
@@ -41,7 +41,6 @@ export interface VisitCountry {
 export interface FilterOptions {
   users: User[];
   countries: string[];
-  genders: string[];
   years: string[];
   continents: string[];
 }
@@ -65,7 +64,6 @@ export interface MapData {
 export interface FilterState {
   selectedUserId?: number;
   selectedCountryCode?: string;
-  selectedGender?: string;
   selectedYear?: string;
   selectedContinent?: string;
   startDate?: string;

@@ -193,9 +193,9 @@ const VideoList: React.FC<VideoListProps> = ({
                   <Typography variant="caption" color="text.secondary">
                     {video.user.name}
                   </Typography>
-                  {video.user.gender && (
+                  {/* {video.user.gender && (
                     <Chip label={video.user.gender} size="small" variant="outlined" />
-                  )}
+                  )} */}
                 </Box>
 
                 {/* 통계 정보 */}

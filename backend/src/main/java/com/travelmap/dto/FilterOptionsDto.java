@@ -5,18 +5,15 @@ import java.util.List;
 public class FilterOptionsDto {
     private List<UserDto> users;
     private List<String> countries;
-    private List<String> genders;
     private List<String> years;
     private List<String> continents;
     
     public FilterOptionsDto() {}
     
     public FilterOptionsDto(List<UserDto> users, List<String> countries, 
-                           List<String> genders, List<String> years, 
-                           List<String> continents) {
+                           List<String> years, List<String> continents) {
         this.users = users;
         this.countries = countries;
-        this.genders = genders;
         this.years = years;
         this.continents = continents;
     }
@@ -38,13 +35,7 @@ public class FilterOptionsDto {
         this.countries = countries;
     }
     
-    public List<String> getGenders() {
-        return genders;
-    }
-    
-    public void setGenders(List<String> genders) {
-        this.genders = genders;
-    }
+
     
     public List<String> getYears() {
         return years;

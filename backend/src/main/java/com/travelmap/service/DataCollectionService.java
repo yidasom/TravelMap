@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -61,7 +62,7 @@ public class DataCollectionService {
             for (User user : users) {
                 try {
                     currentStatus = String.format("채널 처리 중: %s", user.getName());
-                    collectChannelData(user.getYoutubeChannelId());
+                    collectChannelData(user.getSearchQuery() != null ? user.getSearchQuery() : user.getName());
                     processedCount.incrementAndGet();
                 } catch (Exception e) {
                     logger.error("채널 데이터 수집 실패: {}", user.getName(), e);
@@ -94,15 +95,15 @@ public class DataCollectionService {
     /**
      * 특정 채널의 데이터 수집
      */
-    public Map<String, Object> collectChannelData(String channelId) {
-        logger.info("채널 데이터 수집 시작: {}", channelId);
+    public Map<String, Object> collectChannelData(String searchQuery) {
+        logger.info("채널 데이터 수집 시작: {}", searchQuery);
         
         try {
             // 1. 채널 정보 저장
-            User user = youTubeService.saveChannelInfo(channelId);
+            User user = youTubeService.saveChannelInfo(searchQuery);
             
             // 2. 최신 영상 50개 수집
-            List<Video> videos = youTubeService.saveChannelVideos(channelId, 50);
+            List<Video> videos = youTubeService.saveChannelVideos(user.getYoutubeChannelId(), 50);
             
             // 3. 비동기로 국가 감지 처리
             CompletableFuture.runAsync(() -> {
@@ -123,7 +124,7 @@ public class DataCollectionService {
             );
             
         } catch (Exception e) {
-            logger.error("채널 데이터 수집 실패: {}", channelId, e);
+            logger.error("채널 데이터 수집 실패: {}", searchQuery, e);
             return Map.of(
                 "status", "error",
                 "message", "채널 데이터 수집 실패: " + e.getMessage()
@@ -257,23 +258,24 @@ public class DataCollectionService {
     /**
      * 새 채널 추가
      */
-    public Map<String, Object> addNewChannel(String channelId, String channelName) {
-        logger.info("새 채널 추가: {} ({})", channelName, channelId);
+    public Map<String, Object> addNewChannel(String searchQuery, String channelName) {
+        logger.info("새 채널 추가: {} ({})", channelName, searchQuery);
         
         try {
-            // 이미 존재하는지 확인
-            if (userRepository.findByYoutubeChannelId(channelId).isPresent()) {
+            // 채널 정보 수집 및 저장
+            User user = youTubeService.saveChannelInfo(searchQuery);
+            
+            // 이미 존재하는지 확인 (실제 채널 ID로)
+            Optional<User> existingUser = userRepository.findByYoutubeChannelId(user.getYoutubeChannelId());
+            if (existingUser.isPresent() && !existingUser.get().getId().equals(user.getId())) {
                 return Map.of(
                     "status", "error",
                     "message", "이미 등록된 채널입니다."
                 );
             }
             
-            // 채널 정보 수집 및 저장
-            User user = youTubeService.saveChannelInfo(channelId);
-            
             // 최신 영상 수집
-            List<Video> videos = youTubeService.saveChannelVideos(channelId, 50);
+            List<Video> videos = youTubeService.saveChannelVideos(user.getYoutubeChannelId(), 50);
             
             // 비동기로 국가 감지
             CompletableFuture.runAsync(() -> {
@@ -294,7 +296,7 @@ public class DataCollectionService {
             );
             
         } catch (Exception e) {
-            logger.error("새 채널 추가 실패: {}", channelId, e);
+            logger.error("새 채널 추가 실패: {}", searchQuery, e);
             return Map.of(
                 "status", "error",
                 "message", "채널 추가 실패: " + e.getMessage()

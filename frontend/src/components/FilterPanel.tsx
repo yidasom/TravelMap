@@ -82,9 +82,6 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
                         />
                       )}
                       <span>{user.name}</span>
-                      {user.gender && (
-                        <Chip label={user.gender} size="small" variant="outlined" />
-                      )}
                     </Box>
                   </MenuItem>
                 ))}
@@ -111,24 +108,7 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
             </FormControl>
           </Grid>
 
-          {/* 성별 선택 */}
-          <Grid item xs={12} md={2}>
-            <FormControl fullWidth size="small">
-              <InputLabel>성별</InputLabel>
-              <Select
-                value={filters.selectedGender || ''}
-                label="성별"
-                onChange={handleFilterChange('selectedGender')}
-              >
-                <MenuItem value="">전체</MenuItem>
-                {options.genders.map((gender) => (
-                  <MenuItem key={gender} value={gender}>
-                    {gender}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-          </Grid>
+
 
           {/* 연도 선택 */}
           <Grid item xs={12} md={2}>
@@ -208,13 +188,7 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
                   onDelete={() => onFilterChange({ ...filters, selectedCountryCode: undefined })}
                 />
               )}
-              {filters.selectedGender && (
-                <Chip
-                  label={`성별: ${filters.selectedGender}`}
-                  size="small"
-                  onDelete={() => onFilterChange({ ...filters, selectedGender: undefined })}
-                />
-              )}
+
               {filters.selectedYear && (
                 <Chip
                   label={`연도: ${filters.selectedYear}`}

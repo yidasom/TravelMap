@@ -59,9 +59,6 @@ public class TravelMapController {
             // 국가 목록
             List<String> countries = visitCountryRepository.findDistinctCountryNames();
             
-            // 성별 목록
-            List<String> genders = userRepository.findDistinctGenders();
-            
             // 대륙 목록
             List<String> continents = visitCountryRepository.findDistinctContinents();
             
@@ -69,7 +66,7 @@ public class TravelMapController {
             List<String> years = getDistinctYears();
             
             FilterOptionsDto filterOptions = new FilterOptionsDto(
-                    userDtos, countries, genders, years, continents
+                    userDtos, countries, years, continents
             );
             
             logger.info("필터 옵션 반환 완료");
@@ -88,16 +85,15 @@ public class TravelMapController {
     public ResponseEntity<MapDataDto> getMapData(
             @RequestParam(required = false) Long userId,
             @RequestParam(required = false) String countryCode,
-            @RequestParam(required = false) String gender,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate) {
         
-        logger.info("지도 데이터 요청: userId={}, countryCode={}, gender={}, startDate={}, endDate={}", 
-                   userId, countryCode, gender, startDate, endDate);
+        logger.info("지도 데이터 요청: userId={}, countryCode={}, startDate={}, endDate={}", 
+                   userId, countryCode, startDate, endDate);
         
         try {
             // 필터링된 방문 국가 데이터 조회
-            List<VisitCountry> visitCountries = visitCountryRepository.findByFilters(userId, countryCode, gender);
+            List<VisitCountry> visitCountries = visitCountryRepository.findByFilters(userId, countryCode);
             
             // 국가별 집계
             Map<String, List<VisitCountry>> countryGroups = visitCountries.stream()
@@ -156,17 +152,16 @@ public class TravelMapController {
     public ResponseEntity<List<VideoDto>> getVideos(
             @RequestParam(required = false) Long userId,
             @RequestParam(required = false) String countryCode,
-            @RequestParam(required = false) String gender,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
         
-        logger.info("영상 목록 요청: userId={}, countryCode={}, gender={}, page={}, size={}", 
-                   userId, countryCode, gender, page, size);
+        logger.info("영상 목록 요청: userId={}, countryCode={}, page={}, size={}", 
+                   userId, countryCode, page, size);
         
         try {
-            List<Video> videos = videoRepository.findByFilters(userId, countryCode, gender, startDate, endDate);
+            List<Video> videos = videoRepository.findByFilters(userId, countryCode, startDate, endDate);
             
             // 업로드 날짜 기준 내림차순 정렬
             videos.sort((a, b) -> {
@@ -263,11 +258,11 @@ public class TravelMapController {
      * 특정 채널 데이터 수집
      */
     @PostMapping("/admin/collect-channel")
-    public ResponseEntity<Map<String, Object>> collectChannelData(@RequestParam String channelId) {
-        logger.info("특정 채널 데이터 수집 요청: {}", channelId);
+    public ResponseEntity<Map<String, Object>> collectChannelData(@RequestParam String searchQuery) {
+        logger.info("특정 채널 데이터 수집 요청: {}", searchQuery);
         
         try {
-            Map<String, Object> result = dataCollectionService.collectChannelData(channelId);
+            Map<String, Object> result = dataCollectionService.collectChannelData(searchQuery);
             return ResponseEntity.ok(result);
         } catch (Exception e) {
             logger.error("특정 채널 데이터 수집 API 오류", e);
@@ -330,12 +325,12 @@ public class TravelMapController {
      */
     @PostMapping("/admin/add-channel")
     public ResponseEntity<Map<String, Object>> addNewChannel(
-            @RequestParam String channelId,
+            @RequestParam String searchQuery,
             @RequestParam(required = false) String channelName) {
-        logger.info("새 채널 추가 요청: {} ({})", channelName, channelId);
+        logger.info("새 채널 추가 요청: {} ({})", channelName, searchQuery);
         
         try {
-            Map<String, Object> result = dataCollectionService.addNewChannel(channelId, channelName);
+            Map<String, Object> result = dataCollectionService.addNewChannel(searchQuery, channelName);
             return ResponseEntity.ok(result);
         } catch (Exception e) {
             logger.error("새 채널 추가 API 오류", e);

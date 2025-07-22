@@ -5,7 +5,7 @@ import com.travelmap.entity.User;
 public class UserDto {
     private Long id;
     private String name;
-    private String gender;
+    private String searchQuery;
     private String youtubeChannelId;
     private String channelUrl;
     private String profileImageUrl;
@@ -17,7 +17,7 @@ public class UserDto {
     public UserDto(User user) {
         this.id = user.getId();
         this.name = user.getName();
-        this.gender = user.getGender();
+        this.searchQuery = user.getSearchQuery();
         this.youtubeChannelId = user.getYoutubeChannelId();
         this.channelUrl = user.getChannelUrl();
         this.profileImageUrl = user.getProfileImageUrl();
@@ -42,12 +42,12 @@ public class UserDto {
         this.name = name;
     }
     
-    public String getGender() {
-        return gender;
+    public String getSearchQuery() {
+        return searchQuery;
     }
     
-    public void setGender(String gender) {
-        this.gender = gender;
+    public void setSearchQuery(String searchQuery) {
+        this.searchQuery = searchQuery;
     }
     
     public String getYoutubeChannelId() {

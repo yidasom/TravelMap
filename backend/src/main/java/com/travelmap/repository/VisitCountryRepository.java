@@ -41,11 +41,9 @@ public interface VisitCountryRepository extends JpaRepository<VisitCountry, Long
     
     @Query("SELECT vc FROM VisitCountry vc JOIN vc.video v JOIN v.user u " +
            "WHERE (:userId IS NULL OR u.id = :userId) " +
-           "AND (:countryCode IS NULL OR vc.countryCode = :countryCode) " +
-           "AND (:gender IS NULL OR u.gender = :gender)")
+           "AND (:countryCode IS NULL OR vc.countryCode = :countryCode)")
     List<VisitCountry> findByFilters(@Param("userId") Long userId,
-                                   @Param("countryCode") String countryCode,
-                                   @Param("gender") String gender);
+                                   @Param("countryCode") String countryCode);
     
     @Query("SELECT COUNT(vc) FROM VisitCountry vc WHERE vc.video = :video")
     Long countByVideo(@Param("video") Video video);

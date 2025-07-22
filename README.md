@@ -53,7 +53,6 @@
 
 - `userId`: 유튜버 ID
 - `countryCode`: 국가 코드 (ISO 2자리)
-- `gender`: 성별
 - `startDate`: 시작 날짜 (ISO 8601)
 - `endDate`: 종료 날짜 (ISO 8601)
 - `page`: 페이지 번호 (기본값: 0)

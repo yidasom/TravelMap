@@ -28,8 +28,7 @@ public interface VideoRepository extends JpaRepository<Video, Long> {
     List<Video> findByUploadDateBetween(@Param("startDate") LocalDateTime startDate, 
                                         @Param("endDate") LocalDateTime endDate);
     
-    @Query("SELECT v FROM Video v JOIN v.user u WHERE u.gender = :gender")
-    List<Video> findByUserGender(@Param("gender") String gender);
+
     
     @Query("SELECT v FROM Video v JOIN v.visitCountries vc WHERE vc.countryCode = :countryCode")
     List<Video> findByCountryCode(@Param("countryCode") String countryCode);
@@ -37,12 +36,10 @@ public interface VideoRepository extends JpaRepository<Video, Long> {
     @Query("SELECT v FROM Video v JOIN v.user u JOIN v.visitCountries vc " +
        "WHERE (COALESCE(:userId, u.id) = u.id) " +
        "AND (COALESCE(:countryCode, vc.countryCode) = vc.countryCode) " +
-       "AND (COALESCE(:gender, u.gender) = u.gender) " +
        "AND (COALESCE(:startDate, v.uploadDate) <= v.uploadDate) " +
        "AND (COALESCE(:endDate, v.uploadDate) >= v.uploadDate)")
     List<Video> findByFilters(@Param("userId") Long userId,
                           @Param("countryCode") String countryCode,
-                          @Param("gender") String gender,
                           @Param("startDate") LocalDateTime startDate,
                           @Param("endDate") LocalDateTime endDate);
 

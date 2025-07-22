@@ -14,12 +14,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
     
     Optional<User> findByYoutubeChannelId(String youtubeChannelId);
     
-    List<User> findByGender(String gender);
-    
     List<User> findByNameContainingIgnoreCase(String name);
-    
-    @Query("SELECT DISTINCT u.gender FROM User u WHERE u.gender IS NOT NULL")
-    List<String> findDistinctGenders();
     
     @Query("SELECT u FROM User u WHERE u.totalVideoCount > :minVideoCount")
     List<User> findUsersWithMinimumVideos(@Param("minVideoCount") Long minVideoCount);

@@ -1,8 +1,8 @@
-package com.travelmap.backend.service;
+package com.travelmap.service;
 
-import com.travelmap.backend.entity.Video;
-import com.travelmap.backend.entity.VisitCountry;
-import com.travelmap.backend.repository.VisitCountryRepository;
+import com.travelmap.entity.Video;
+import com.travelmap.entity.VisitCountry;
+import com.travelmap.repository.VisitCountryRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

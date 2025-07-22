@@ -84,6 +84,55 @@ export const apiService = {
   },
 };
 
+// 데이터 수집 API 서비스
+export const dataCollectionApi = {
+  // 전체 데이터 수집
+  async collectAllData() {
+    const response = await api.post('/admin/collect-all');
+    return response;
+  },
+
+  // 특정 채널 데이터 수집
+  async collectChannelData(channelId: string) {
+    const response = await api.post('/admin/collect-channel', null, {
+      params: { channelId }
+    });
+    return response;
+  },
+
+  // 전체 채널 데이터 업데이트
+  async updateAllChannelsData() {
+    const response = await api.post('/admin/update-all');
+    return response;
+  },
+
+  // 처리되지 않은 영상들 처리
+  async processUnprocessedVideos() {
+    const response = await api.post('/admin/process-unprocessed');
+    return response;
+  },
+
+  // 수집 상태 조회
+  async getCollectionStatus() {
+    const response = await api.get('/admin/collection-status');
+    return response;
+  },
+
+  // 새 채널 추가
+  async addNewChannel(channelId: string, channelName?: string) {
+    const params = new URLSearchParams();
+    params.append('channelId', channelId);
+    if (channelName) {
+      params.append('channelName', channelName);
+    }
+    
+    const response = await api.post('/admin/add-channel', null, {
+      params: Object.fromEntries(params)
+    });
+    return response;
+  },
+};
+
 // 에러 핸들링을 위한 인터셉터
 api.interceptors.response.use(
   (response) => response,

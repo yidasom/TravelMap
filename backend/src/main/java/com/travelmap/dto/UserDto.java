@@ -1,6 +1,6 @@
-package com.travelmap.backend.dto;
+package com.travelmap.dto;
 
-import com.travelmap.backend.entity.User;
+import com.travelmap.entity.User;
 
 public class UserDto {
     private Long id;

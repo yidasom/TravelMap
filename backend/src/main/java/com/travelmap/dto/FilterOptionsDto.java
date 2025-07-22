@@ -1,4 +1,4 @@
-package com.travelmap.backend.dto;
+package com.travelmap.dto;
 
 import java.util.List;
 

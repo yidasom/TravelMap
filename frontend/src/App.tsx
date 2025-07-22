@@ -27,6 +27,7 @@ import {
 import FilterPanel from './components/FilterPanel';
 import WorldMap from './components/WorldMap';
 import VideoList from './components/VideoList';
+import DataCollectionPanel from './components/DataCollectionPanel';
 import { FilterState, Video } from './types';
 
 // Material-UI 테마 설정
@@ -142,6 +143,9 @@ const MainApp: React.FC = () => {
             onResetFilters={handleResetFilters}
           />
         )}
+
+        {/* 데이터 수집 관리 패널 */}
+        <DataCollectionPanel />
 
         {/* 지도 영역 */}
         <Box sx={{ mb: 4 }}>

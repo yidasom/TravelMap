@@ -1,7 +1,7 @@
-package com.travelmap.backend.dto;
+package com.travelmap.dto;
 
-import com.travelmap.backend.entity.Video;
-import com.travelmap.backend.entity.VisitCountry;
+import com.travelmap.entity.Video;
+import com.travelmap.entity.VisitCountry;
 
 import java.time.LocalDateTime;
 import java.util.List;

@@ -1,11 +1,11 @@
-package com.travelmap.backend.service;
+package com.travelmap.service;
 
 import com.google.api.services.youtube.YouTube;
 import com.google.api.services.youtube.model.*;
-import com.travelmap.backend.entity.User;
-import com.travelmap.backend.entity.Video;
-import com.travelmap.backend.repository.UserRepository;
-import com.travelmap.backend.repository.VideoRepository;
+import com.travelmap.entity.User;
+import com.travelmap.entity.Video;
+import com.travelmap.repository.UserRepository;
+import com.travelmap.repository.VideoRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

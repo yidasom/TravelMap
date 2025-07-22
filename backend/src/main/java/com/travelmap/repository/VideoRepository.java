@@ -1,7 +1,7 @@
-package com.travelmap.backend.repository;
+package com.travelmap.repository;
 
-import com.travelmap.backend.entity.Video;
-import com.travelmap.backend.entity.User;
+import com.travelmap.entity.Video;
+import com.travelmap.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

@@ -1,4 +1,4 @@
-package com.travelmap.backend.entity;
+package com.travelmap.entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;

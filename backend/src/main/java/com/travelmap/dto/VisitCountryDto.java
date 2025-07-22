@@ -1,6 +1,6 @@
-package com.travelmap.backend.dto;
+package com.travelmap.dto;
 
-import com.travelmap.backend.entity.VisitCountry;
+import com.travelmap.entity.VisitCountry;
 
 public class VisitCountryDto {
     private Long id;

@@ -1,12 +1,13 @@
-package com.travelmap.backend.controller;
+package com.travelmap.controller;
 
-import com.travelmap.backend.dto.*;
-import com.travelmap.backend.entity.User;
-import com.travelmap.backend.entity.Video;
-import com.travelmap.backend.entity.VisitCountry;
-import com.travelmap.backend.repository.UserRepository;
-import com.travelmap.backend.repository.VideoRepository;
-import com.travelmap.backend.repository.VisitCountryRepository;
+import com.travelmap.dto.*;
+import com.travelmap.entity.User;
+import com.travelmap.entity.Video;
+import com.travelmap.entity.VisitCountry;
+import com.travelmap.repository.UserRepository;
+import com.travelmap.repository.VideoRepository;
+import com.travelmap.repository.VisitCountryRepository;
+import com.travelmap.service.DataCollectionService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,14 +29,17 @@ public class TravelMapController {
     private final UserRepository userRepository;
     private final VideoRepository videoRepository;
     private final VisitCountryRepository visitCountryRepository;
+    private final DataCollectionService dataCollectionService;
     
     @Autowired
     public TravelMapController(UserRepository userRepository,
                               VideoRepository videoRepository,
-                              VisitCountryRepository visitCountryRepository) {
+                              VisitCountryRepository visitCountryRepository,
+                              DataCollectionService dataCollectionService) {
         this.userRepository = userRepository;
         this.videoRepository = videoRepository;
         this.visitCountryRepository = visitCountryRepository;
+        this.dataCollectionService = dataCollectionService;
     }
     
     /**
@@ -235,6 +239,108 @@ public class TravelMapController {
         } catch (Exception e) {
             logger.error("국가별 영상 조회 오류", e);
             return ResponseEntity.internalServerError().build();
+        }
+    }
+    
+    /**
+     * 전체 데이터 수집 시작
+     */
+    @PostMapping("/admin/collect-all")
+    public ResponseEntity<Map<String, Object>> collectAllData() {
+        logger.info("전체 데이터 수집 요청");
+        
+        try {
+            Map<String, Object> result = dataCollectionService.collectAllData();
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            logger.error("전체 데이터 수집 API 오류", e);
+            return ResponseEntity.internalServerError()
+                    .body(Map.of("status", "error", "message", "서버 오류가 발생했습니다."));
+        }
+    }
+    
+    /**
+     * 특정 채널 데이터 수집
+     */
+    @PostMapping("/admin/collect-channel")
+    public ResponseEntity<Map<String, Object>> collectChannelData(@RequestParam String channelId) {
+        logger.info("특정 채널 데이터 수집 요청: {}", channelId);
+        
+        try {
+            Map<String, Object> result = dataCollectionService.collectChannelData(channelId);
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            logger.error("특정 채널 데이터 수집 API 오류", e);
+            return ResponseEntity.internalServerError()
+                    .body(Map.of("status", "error", "message", "서버 오류가 발생했습니다."));
+        }
+    }
+    
+    /**
+     * 전체 채널 데이터 업데이트
+     */
+    @PostMapping("/admin/update-all")
+    public ResponseEntity<Map<String, Object>> updateAllChannelsData() {
+        logger.info("전체 채널 데이터 업데이트 요청");
+        
+        try {
+            Map<String, Object> result = dataCollectionService.updateAllChannelsData();
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            logger.error("전체 채널 데이터 업데이트 API 오류", e);
+            return ResponseEntity.internalServerError()
+                    .body(Map.of("status", "error", "message", "서버 오류가 발생했습니다."));
+        }
+    }
+    
+    /**
+     * 처리되지 않은 영상들 처리
+     */
+    @PostMapping("/admin/process-unprocessed")
+    public ResponseEntity<Map<String, Object>> processUnprocessedVideos() {
+        logger.info("처리되지 않은 영상들 처리 요청");
+        
+        try {
+            Map<String, Object> result = dataCollectionService.processUnprocessedVideos();
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            logger.error("처리되지 않은 영상들 처리 API 오류", e);
+            return ResponseEntity.internalServerError()
+                    .body(Map.of("status", "error", "message", "서버 오류가 발생했습니다."));
+        }
+    }
+    
+    /**
+     * 수집 상태 조회
+     */
+    @GetMapping("/admin/collection-status")
+    public ResponseEntity<Map<String, Object>> getCollectionStatus() {
+        try {
+            Map<String, Object> status = dataCollectionService.getCollectionStatus();
+            return ResponseEntity.ok(status);
+        } catch (Exception e) {
+            logger.error("수집 상태 조회 API 오류", e);
+            return ResponseEntity.internalServerError()
+                    .body(Map.of("status", "error", "message", "서버 오류가 발생했습니다."));
+        }
+    }
+    
+    /**
+     * 새 채널 추가
+     */
+    @PostMapping("/admin/add-channel")
+    public ResponseEntity<Map<String, Object>> addNewChannel(
+            @RequestParam String channelId,
+            @RequestParam(required = false) String channelName) {
+        logger.info("새 채널 추가 요청: {} ({})", channelName, channelId);
+        
+        try {
+            Map<String, Object> result = dataCollectionService.addNewChannel(channelId, channelName);
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            logger.error("새 채널 추가 API 오류", e);
+            return ResponseEntity.internalServerError()
+                    .body(Map.of("status", "error", "message", "서버 오류가 발생했습니다."));
         }
     }
     

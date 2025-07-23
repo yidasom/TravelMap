@@ -44,9 +44,14 @@ interface CollectionResult {
   totalCount?: number;
   channelName?: string;
   videoCount?: number;
+  countryProcessedCount?: number;
 }
 
-const DataCollectionPanel: React.FC = () => {
+interface DataCollectionPanelProps {
+  onDataUpdated?: () => void; // 데이터 업데이트 콜백
+}
+
+const DataCollectionPanel: React.FC<DataCollectionPanelProps> = ({ onDataUpdated }) => {
   const [status, setStatus] = useState<CollectionStatus>({
     isCollecting: false,
     currentStatus: '대기 중',
@@ -83,6 +88,13 @@ const DataCollectionPanel: React.FC = () => {
       setResult(null);
       const response = await dataCollectionApi.collectAllData();
       setResult(response.data);
+      
+      // 데이터 수집 완료 시 자동 렌더링
+      if (response.data.status === 'success' && onDataUpdated) {
+        setTimeout(() => {
+          onDataUpdated();
+        }, 1000); // 1초 후 데이터 새로고침
+      }
     } catch (error: any) {
       setResult({
         status: 'error',
@@ -96,6 +108,13 @@ const DataCollectionPanel: React.FC = () => {
       setResult(null);
       const response = await dataCollectionApi.updateAllChannelsData();
       setResult(response.data);
+      
+      // 데이터 업데이트 완료 시 자동 렌더링
+      if (response.data.status === 'success' && onDataUpdated) {
+        setTimeout(() => {
+          onDataUpdated();
+        }, 1000);
+      }
     } catch (error: any) {
       setResult({
         status: 'error',
@@ -109,6 +128,13 @@ const DataCollectionPanel: React.FC = () => {
       setResult(null);
       const response = await dataCollectionApi.processUnprocessedVideos();
       setResult(response.data);
+      
+      // 미처리 영상 처리 완료 시 자동 렌더링
+      if (response.data.status === 'success' && onDataUpdated) {
+        setTimeout(() => {
+          onDataUpdated();
+        }, 1000);
+      }
     } catch (error: any) {
       setResult({
         status: 'error',
@@ -130,6 +156,13 @@ const DataCollectionPanel: React.FC = () => {
       setResult(null);
       const response = await dataCollectionApi.collectChannelData(searchQuery);
       setResult(response.data);
+      
+      // 개별 채널 수집 완료 시 자동 렌더링
+      if (response.data.status === 'success' && onDataUpdated) {
+        setTimeout(() => {
+          onDataUpdated();
+        }, 1000);
+      }
     } catch (error: any) {
       setResult({
         status: 'error',
@@ -154,6 +187,13 @@ const DataCollectionPanel: React.FC = () => {
       setAddChannelOpen(false);
       setSearchQuery('');
       setChannelName('');
+      
+      // 새 채널 추가 완료 시 자동 렌더링
+      if (response.data.status === 'success' && onDataUpdated) {
+        setTimeout(() => {
+          onDataUpdated();
+        }, 1000);
+      }
     } catch (error: any) {
       setResult({
         status: 'error',
@@ -225,6 +265,11 @@ const DataCollectionPanel: React.FC = () => {
                 <Typography variant="caption" display="block">
                   처리된 항목: {result.processedCount}
                   {result.totalCount && ` / ${result.totalCount}`}
+                </Typography>
+              )}
+              {result.countryProcessedCount !== undefined && (
+                <Typography variant="caption" display="block">
+                  국가 정보 처리: {result.countryProcessedCount}개 영상
                 </Typography>
               )}
             </Alert>

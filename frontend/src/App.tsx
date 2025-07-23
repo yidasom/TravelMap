@@ -117,6 +117,17 @@ const MainApp: React.FC = () => {
     setShowError(false);
     dispatch(clearError());
   };
+  
+  // 데이터 업데이트 완료 핸들러 (자동 리렌더링)
+  const handleDataUpdated = () => {
+    console.log('데이터 수집 완료 - 자동 새로고침 시작');
+    // 필터 옵션 다시 로드
+    dispatch(fetchFilterOptions());
+    // 현재 필터로 지도 데이터 다시 로드
+    dispatch(fetchMapData(filters));
+    // 현재 필터로 영상 목록 다시 로드
+    dispatch(fetchVideos({ filters }));
+  };
 
   return (
     <Box sx={{ flexGrow: 1 }}>
@@ -145,7 +156,7 @@ const MainApp: React.FC = () => {
         )}
 
         {/* 데이터 수집 관리 패널 */}
-        <DataCollectionPanel />
+        <DataCollectionPanel onDataUpdated={handleDataUpdated} />
 
         {/* 지도 영역 */}
         <Box sx={{ mb: 4 }}>

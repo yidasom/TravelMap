@@ -57,6 +57,24 @@ const countryCoordinates: { [key: string]: [number, number] } = {
   'PL': [51.9, 19.1], 'CZ': [49.8, 15.5], 'HU': [47.2, 19.5], 'PT': [39.4, -8.2]
 };
 
+// 안전한 국가 좌표 가져오기 (대한민국을 기본값으로 사용)
+const getCountryCoordinates = (countryCode: string): [number, number] => {
+  // 국가 코드가 비어있거나 유효하지 않은 경우 대한민국 사용
+  if (!countryCode || typeof countryCode !== 'string') {
+    console.warn(`Invalid country code: ${countryCode}, using Korea as fallback`);
+    return countryCoordinates['KR'];
+  }
+  
+  // 해당 국가의 좌표가 있으면 반환, 없으면 대한민국 좌표 반환
+  const coordinates = countryCoordinates[countryCode.toUpperCase()];
+  if (coordinates) {
+    return coordinates;
+  } else {
+    console.warn(`Country coordinates not found for: ${countryCode}, using Korea as fallback`);
+    return countryCoordinates['KR'];
+  }
+};
+
 // 지도 바운딩 및 반응형 처리 컴포넌트
 const MapBounds: React.FC<{ countries: CountryData[] }> = ({ countries }) => {
   const map = useMap();
@@ -64,9 +82,9 @@ const MapBounds: React.FC<{ countries: CountryData[] }> = ({ countries }) => {
   useEffect(() => {
     if (countries.length > 0) {
       const bounds = countries.map(country => {
-        const coords = countryCoordinates[country.countryCode];
-        return coords ? L.latLng(coords[0], coords[1]) : null;
-      }).filter(Boolean) as L.LatLng[];
+        const coords = getCountryCoordinates(country.countryCode);
+        return L.latLng(coords[0], coords[1]);
+      });
       
       if (bounds.length > 0) {
         const group = L.featureGroup(bounds.map(coord => L.marker(coord)));
@@ -115,13 +133,16 @@ const MapBounds: React.FC<{ countries: CountryData[] }> = ({ countries }) => {
         });
       }
     } else {
-      // 데이터가 없으면 전세계 뷰로 설정
+      // 데이터가 없으면 대한민국 중심으로 설정
+      const koreaCoords = getCountryCoordinates('KR');
+      map.setView(koreaCoords, 7);
+      
+      // 전세계 뷰도 허용
       const worldBounds = L.latLngBounds(
         L.latLng(-85, -180),
         L.latLng(85, 180)
       );
       map.setMaxBounds(worldBounds);
-      map.setView([20, 0], 2);
     }
   }, [countries, map]);
 
@@ -136,9 +157,9 @@ const MapBounds: React.FC<{ countries: CountryData[] }> = ({ countries }) => {
       if (currentZoom >= 6 && countries.length > 0) {
         // 고줌 레벨에서는 경계 제한을 더 완화
         const bounds = countries.map(country => {
-          const coords = countryCoordinates[country.countryCode];
-          return coords ? L.latLng(coords[0], coords[1]) : null;
-        }).filter(Boolean) as L.LatLng[];
+          const coords = getCountryCoordinates(country.countryCode);
+          return L.latLng(coords[0], coords[1]);
+        });
         
         if (bounds.length > 0) {
           const group = L.featureGroup(bounds.map(coord => L.marker(coord)));
@@ -228,22 +249,20 @@ const WorldMap: React.FC<WorldMapProps> = ({ mapData, onCountryClick }) => {
     }>();
 
     mapData.countries.forEach(country => {
-      const coords = countryCoordinates[country.countryCode];
-      if (coords) {
-        const key = `${Math.round(coords[0] * 2) / 2}_${Math.round(coords[1] * 2) / 2}`;
-        
-        if (!clusters.has(key)) {
-          clusters.set(key, {
-            position: coords,
-            countries: [],
-            totalVisits: 0
-          });
-        }
-        
-        const cluster = clusters.get(key)!;
-        cluster.countries.push(country);
-        cluster.totalVisits += country.visitCount;
+      const coords = getCountryCoordinates(country.countryCode);
+      const key = `${Math.round(coords[0] * 2) / 2}_${Math.round(coords[1] * 2) / 2}`;
+      
+      if (!clusters.has(key)) {
+        clusters.set(key, {
+          position: coords,
+          countries: [],
+          totalVisits: 0
+        });
       }
+      
+      const cluster = clusters.get(key)!;
+      cluster.countries.push(country);
+      cluster.totalVisits += country.visitCount;
     });
 
     return Array.from(clusters.values());
@@ -258,8 +277,8 @@ const WorldMap: React.FC<WorldMapProps> = ({ mapData, onCountryClick }) => {
         if (!routes[youtuber.id]) {
           routes[youtuber.id] = [];
         }
-        const coords = countryCoordinates[country.countryCode];
-        if (coords && !routes[youtuber.id].some(([lat, lng]) => lat === coords[0] && lng === coords[1])) {
+        const coords = getCountryCoordinates(country.countryCode);
+        if (!routes[youtuber.id].some(([lat, lng]) => lat === coords[0] && lng === coords[1])) {
           routes[youtuber.id].push(coords);
         }
       });

@@ -13,7 +13,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
@@ -105,22 +104,29 @@ public class DataCollectionService {
             // 2. 최신 영상 50개 수집
             List<Video> videos = youTubeService.saveChannelVideos(user.getYoutubeChannelId(), 50);
             
-            // 3. 비동기로 국가 감지 처리
-            CompletableFuture.runAsync(() -> {
-                for (Video video : videos) {
-                    try {
+            // 3. 동기로 국가 감지 처리 (외래키 제약조건 문제 해결)
+            int countryProcessedCount = 0;
+            for (Video video : videos) {
+                try {
+                    // Video 객체가 완전히 영속화된 상태인지 확인
+                    if (video.getId() != null) {
                         countryDetectionService.extractCountriesFromTitle(video);
-                    } catch (Exception e) {
-                        logger.error("국가 감지 실패: {}", video.getVideoId(), e);
+                        countryProcessedCount++;
+                    } else {
+                        logger.warn("Video ID가 null입니다. 국가 감지를 건너뜁니다: {}", video.getVideoId());
                     }
+                } catch (Exception e) {
+                    logger.error("국가 감지 실패: {} - {}", video.getVideoId(), e.getMessage());
+                    // 개별 비디오 국가 감지 실패해도 계속 진행
                 }
-            });
+            }
             
             return Map.of(
                 "status", "success",
-                "message", String.format("채널 데이터 수집 완료: %d개 영상", videos.size()),
+                "message", String.format("채널 데이터 수집 완료: %d개 영상, %d개 영상 국가 정보 처리", videos.size(), countryProcessedCount),
                 "channelName", user.getName(),
-                "videoCount", videos.size()
+                "videoCount", videos.size(),
+                "countryProcessedCount", countryProcessedCount
             );
             
         } catch (Exception e) {
@@ -210,16 +216,30 @@ public class DataCollectionService {
             
             for (Video video : unprocessedVideos) {
                 try {
-                    // 영상 상세 정보 업데이트
-                    youTubeService.updateVideoDetails(video.getVideoId());
-                    
-                                         // 국가 감지
-                     countryDetectionService.extractCountriesFromTitle(video);
-                    
-                    video.setProcessed(true);
-                    videoRepository.save(video);
-                    
-                    processed.incrementAndGet();
+                    // Video 객체가 완전히 영속화된 상태인지 확인
+                    if (video.getId() != null) {
+                        // 영상 상세 정보 업데이트
+                        Video updatedVideo = youTubeService.updateVideoDetails(video.getVideoId());
+                        
+                        // 업데이트 성공한 경우에만 국가 감지 진행
+                        if (updatedVideo != null) {
+                            // 국가 감지
+                            countryDetectionService.extractCountriesFromTitle(updatedVideo);
+                            
+                            updatedVideo.setProcessed(true);
+                            videoRepository.save(updatedVideo);
+                        } else {
+                            // 상세 정보 업데이트 실패해도 국가 감지는 시도
+                            countryDetectionService.extractCountriesFromTitle(video);
+                            
+                            video.setProcessed(true);
+                            videoRepository.save(video);
+                        }
+                        
+                        processed.incrementAndGet();
+                    } else {
+                        logger.warn("Video ID가 null입니다. 처리를 건너뜁니다: {}", video.getVideoId());
+                    }
                 } catch (Exception e) {
                     logger.error("영상 처리 실패: {}", video.getVideoId(), e);
                 }
@@ -277,22 +297,29 @@ public class DataCollectionService {
             // 최신 영상 수집
             List<Video> videos = youTubeService.saveChannelVideos(user.getYoutubeChannelId(), 50);
             
-            // 비동기로 국가 감지
-            CompletableFuture.runAsync(() -> {
-                for (Video video : videos) {
-                    try {
+            // 동기로 국가 감지 처리
+            int countryProcessedCount = 0;
+            for (Video video : videos) {
+                try {
+                    // Video 객체가 완전히 영속화된 상태인지 확인
+                    if (video.getId() != null) {
                         countryDetectionService.extractCountriesFromTitle(video);
-                    } catch (Exception e) {
-                        logger.error("국가 감지 실패: {}", video.getVideoId(), e);
+                        countryProcessedCount++;
+                    } else {
+                        logger.warn("Video ID가 null입니다. 국가 감지를 건너뜁니다: {}", video.getVideoId());
                     }
+                } catch (Exception e) {
+                    logger.error("국가 감지 실패: {} - {}", video.getVideoId(), e.getMessage());
+                    // 개별 비디오 국가 감지 실패해도 계속 진행
                 }
-            });
+            }
             
             return Map.of(
                 "status", "success",
                 "message", String.format("새 채널이 추가되었습니다: %s", user.getName()),
                 "channelName", user.getName(),
-                "videoCount", videos.size()
+                "videoCount", videos.size(),
+                "countryProcessedCount", countryProcessedCount
             );
             
         } catch (Exception e) {

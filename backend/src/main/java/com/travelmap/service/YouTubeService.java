@@ -164,30 +164,58 @@ public class YouTubeService {
             PlaylistItemSnippet snippet = item.getSnippet();
             String videoId = snippet.getResourceId().getVideoId();
             
-            // 이미 존재하는 영상인지 확인
-            if (videoRepository.existsByVideoId(videoId)) {
-                logger.debug("이미 존재하는 영상 건너뛰기: {}", videoId);
+            try {
+                // 이미 존재하는 영상인지 확인
+                if (videoRepository.existsByVideoId(videoId)) {
+                    logger.debug("이미 존재하는 영상 건너뛰기: {}", videoId);
+                    continue;
+                }
+                
+                // 필수 데이터 검증
+                if (snippet.getTitle() == null || snippet.getTitle().trim().isEmpty()) {
+                    logger.warn("영상 제목이 비어있어 건너뜀: {}", videoId);
+                    continue;
+                }
+                
+                Video video = new Video();
+                video.setVideoId(videoId);
+                video.setTitle(snippet.getTitle());
+                video.setDescription(snippet.getDescription());
+                
+                // 썸네일 URL 안전하게 설정
+                try {
+                    if (snippet.getThumbnails() != null && snippet.getThumbnails().getDefault() != null) {
+                        video.setThumbnailUrl(snippet.getThumbnails().getDefault().getUrl());
+                    }
+                } catch (Exception e) {
+                    logger.warn("썸네일 URL 설정 실패, 건너뜀: {} - {}", videoId, e.getMessage());
+                }
+                
+                video.setVideoUrl("https://www.youtube.com/watch?v=" + videoId);
+                video.setUser(user);
+                video.setProcessed(false); // 명시적으로 false 설정
+                
+                // 업로드 날짜 파싱
+                try {
+                    if (snippet.getPublishedAt() != null) {
+                        String publishedAt = snippet.getPublishedAt().toString();
+                        video.setUploadDate(LocalDateTime.parse(publishedAt.substring(0, 19)));
+                    }
+                } catch (Exception e) {
+                    logger.warn("업로드 날짜 파싱 실패, 건너뜀: {} - {}", videoId, e.getMessage());
+                    // 날짜 파싱 실패해도 영상은 저장
+                }
+                
+                Video savedVideo = videoRepository.saveAndFlush(video);
+                savedVideos.add(savedVideo);
+                
+                logger.debug("영상 저장 완료: {} (ID: {})", savedVideo.getTitle(), savedVideo.getId());
+                
+            } catch (Exception e) {
+                logger.error("영상 저장 실패, 건너뜀: {} - {}", videoId, e.getMessage());
+                // 개별 영상 저장 실패해도 다음 영상 계속 처리
                 continue;
             }
-            
-            Video video = new Video();
-            video.setVideoId(videoId);
-            video.setTitle(snippet.getTitle());
-            video.setDescription(snippet.getDescription());
-            video.setThumbnailUrl(snippet.getThumbnails().getDefault().getUrl());
-            video.setVideoUrl("https://www.youtube.com/watch?v=" + videoId);
-            video.setUser(user);
-            
-            // 업로드 날짜 파싱
-            if (snippet.getPublishedAt() != null) {
-                String publishedAt = snippet.getPublishedAt().toString();
-                video.setUploadDate(LocalDateTime.parse(publishedAt.substring(0, 19)));
-            }
-            
-            Video savedVideo = videoRepository.save(video);
-            savedVideos.add(savedVideo);
-            
-            logger.debug("영상 저장 완료: {} ({})", savedVideo.getTitle(), savedVideo.getId());
         }
         
         logger.info("채널 영상 수집 완료: {}개 저장", savedVideos.size());
@@ -200,43 +228,64 @@ public class YouTubeService {
     public Video updateVideoDetails(String videoId) throws IOException {
         logger.info("영상 상세 정보 업데이트 시작: {}", videoId);
         
-        Video video = videoRepository.findByVideoId(videoId)
-                .orElseThrow(() -> new RuntimeException("영상을 찾을 수 없습니다: " + videoId));
-        
-        YouTube.Videos.List videoRequest = youtube.videos().list(Collections.singletonList("snippet,statistics,contentDetails"));
-        videoRequest.setId(Collections.singletonList(videoId));
-        videoRequest.setKey(apiKey);
-        
-        VideoListResponse response = videoRequest.execute();
-        List<com.google.api.services.youtube.model.Video> videos = response.getItems();
-        
-        if (videos.isEmpty()) {
-            throw new RuntimeException("YouTube에서 영상을 찾을 수 없습니다: " + videoId);
+        try {
+            Video video = videoRepository.findByVideoId(videoId)
+                    .orElseThrow(() -> new RuntimeException("영상을 찾을 수 없습니다: " + videoId));
+            
+            YouTube.Videos.List videoRequest = youtube.videos().list(Collections.singletonList("snippet,statistics,contentDetails"));
+            videoRequest.setId(Collections.singletonList(videoId));
+            videoRequest.setKey(apiKey);
+            
+            VideoListResponse response = videoRequest.execute();
+            List<com.google.api.services.youtube.model.Video> videos = response.getItems();
+            
+            if (videos.isEmpty()) {
+                logger.warn("YouTube에서 영상을 찾을 수 없음: {}", videoId);
+                return video; // 기존 영상 객체 반환
+            }
+            
+            com.google.api.services.youtube.model.Video youtubeVideo = videos.get(0);
+            VideoSnippet snippet = youtubeVideo.getSnippet();
+            VideoStatistics statistics = youtubeVideo.getStatistics();
+            VideoContentDetails contentDetails = youtubeVideo.getContentDetails();
+            
+            // 상세 정보 업데이트
+            try {
+                if (statistics != null) {
+                    if (statistics.getViewCount() != null) {
+                        video.setViewCount(statistics.getViewCount().longValue());
+                    }
+                    if (statistics.getLikeCount() != null) {
+                        video.setLikeCount(statistics.getLikeCount().longValue());
+                    }
+                    if (statistics.getCommentCount() != null) {
+                        video.setCommentCount(statistics.getCommentCount().longValue());
+                    }
+                }
+            } catch (Exception e) {
+                logger.warn("통계 정보 업데이트 실패: {} - {}", videoId, e.getMessage());
+                // 통계 정보 업데이트 실패해도 계속 진행
+            }
+            
+            try {
+                if (contentDetails != null && contentDetails.getDuration() != null) {
+                    video.setDuration(contentDetails.getDuration());
+                }
+            } catch (Exception e) {
+                logger.warn("영상 길이 업데이트 실패: {} - {}", videoId, e.getMessage());
+                // 영상 길이 업데이트 실패해도 계속 진행
+            }
+            
+            Video savedVideo = videoRepository.save(video);
+            logger.info("영상 상세 정보 업데이트 완료: {}", savedVideo.getId());
+            
+            return savedVideo;
+            
+        } catch (Exception e) {
+            logger.error("영상 상세 정보 업데이트 실패: {} - {}", videoId, e.getMessage());
+            // 실패해도 예외를 다시 던지지 않고 null 반환하여 계속 진행
+            return null;
         }
-        
-        com.google.api.services.youtube.model.Video youtubeVideo = videos.get(0);
-        VideoSnippet snippet = youtubeVideo.getSnippet();
-        VideoStatistics statistics = youtubeVideo.getStatistics();
-        VideoContentDetails contentDetails = youtubeVideo.getContentDetails();
-        
-        // 상세 정보 업데이트
-        if (statistics != null) {
-            video.setViewCount(statistics.getViewCount() != null ? 
-                statistics.getViewCount().longValue() : 0L);
-            video.setLikeCount(statistics.getLikeCount() != null ? 
-                statistics.getLikeCount().longValue() : 0L);
-            video.setCommentCount(statistics.getCommentCount() != null ? 
-                statistics.getCommentCount().longValue() : 0L);
-        }
-        
-        if (contentDetails != null) {
-            video.setDuration(contentDetails.getDuration());
-        }
-        
-        Video savedVideo = videoRepository.save(video);
-        logger.info("영상 상세 정보 업데이트 완료: {}", savedVideo.getId());
-        
-        return savedVideo;
     }
     
     /**

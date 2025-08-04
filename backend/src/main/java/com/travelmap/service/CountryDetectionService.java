@@ -407,16 +407,16 @@ public class CountryDetectionService {
         COUNTRY_KEYWORDS.put("japan", new CountryInfo("JP", "일본", "Asia", "🇯🇵"));
         COUNTRY_KEYWORDS.put("tokyo", new CountryInfo("JP", "일본", "Asia", "🇯🇵"));
         COUNTRY_KEYWORDS.put("도쿄", new CountryInfo("JP", "일본", "Asia", "🇯🇵"));
-        COUNTRY_KEYWORDS.put("오사카", new CountryInfo("JP", "일본", "Asia", "🇯🇵"));
         COUNTRY_KEYWORDS.put("osaka", new CountryInfo("JP", "일본", "Asia", "🇯🇵"));
+        COUNTRY_KEYWORDS.put("오사카", new CountryInfo("JP", "일본", "Asia", "🇯🇵"));
         
         // 중국
         COUNTRY_KEYWORDS.put("중국", new CountryInfo("CN", "중국", "Asia", "🇨🇳"));
         COUNTRY_KEYWORDS.put("china", new CountryInfo("CN", "중국", "Asia", "🇨🇳"));
         COUNTRY_KEYWORDS.put("beijing", new CountryInfo("CN", "중국", "Asia", "🇨🇳"));
         COUNTRY_KEYWORDS.put("베이징", new CountryInfo("CN", "중국", "Asia", "🇨🇳"));
-        COUNTRY_KEYWORDS.put("상하이", new CountryInfo("CN", "중국", "Asia", "🇨🇳"));
         COUNTRY_KEYWORDS.put("shanghai", new CountryInfo("CN", "중국", "Asia", "🇨🇳"));
+        COUNTRY_KEYWORDS.put("상하이", new CountryInfo("CN", "중국", "Asia", "🇨🇳"));
         
         // 미국
         COUNTRY_KEYWORDS.put("미국", new CountryInfo("US", "미국", "North America", "🇺🇸"));
@@ -424,6 +424,8 @@ public class CountryDetectionService {
         COUNTRY_KEYWORDS.put("usa", new CountryInfo("US", "미국", "North America", "🇺🇸"));
         COUNTRY_KEYWORDS.put("new york", new CountryInfo("US", "미국", "North America", "🇺🇸"));
         COUNTRY_KEYWORDS.put("뉴욕", new CountryInfo("US", "미국", "North America", "🇺🇸"));
+        COUNTRY_KEYWORDS.put("la", new CountryInfo("US", "미국", "North America", "🇺🇸"));
+        COUNTRY_KEYWORDS.put("엘에이", new CountryInfo("US", "미국", "North America", "🇺🇸"));
         
         // 프랑스
         COUNTRY_KEYWORDS.put("프랑스", new CountryInfo("FR", "프랑스", "Europe", "🇫🇷"));

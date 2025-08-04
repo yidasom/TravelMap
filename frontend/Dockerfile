@@ -1,32 +1,28 @@
-# Multi-stage build for React application
-FROM node:18-alpine AS build
+# # 1단계: 빌드
+# FROM node:18-alpine AS builder
+# WORKDIR /app
+#
+# COPY package*.json ./
+# RUN npm install
+#
+# COPY . .
+# RUN npm run build
+#
+# # 2단계: Nginx로 서빙
+# FROM nginx:alpine
+# COPY nginx.conf /etc/nginx/conf.d/default.conf
+# COPY --from=builder /app/build /usr/share/nginx/html
+#
+# EXPOSE 80
+# CMD ["nginx", "-g", "daemon off;"]
 
-# Set working directory
+FROM node:18-alpine AS builder
 WORKDIR /app
-
-# Copy package files
-COPY package*.json ./
-
-# Install dependencies
-RUN npm ci --only=production
-
-# Copy source code
 COPY . .
+RUN npm install && npm run build
 
-# Build the application
-RUN npm run build
-
-# Production stage with nginx
 FROM nginx:alpine
+COPY --from=builder /app/build /usr/share/nginx/html
 
-# Copy built app from build stage
-COPY --from=build /app/build /usr/share/nginx/html
+EXPOSE 80
 
-# Copy nginx configuration
-COPY nginx.conf /etc/nginx/conf.d/default.conf
-
-# Expose port
-EXPOSE 3000
-
-# Start nginx
-CMD ["nginx", "-g", "daemon off;"] 

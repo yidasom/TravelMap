@@ -12,6 +12,10 @@ version = '0.0.1-SNAPSHOT'
 //		languageVersion = JavaLanguageVersion.of(21)
 //	}
 //}
+java {
+	sourceCompatibility = JavaVersion.VERSION_21
+	targetCompatibility = JavaVersion.VERSION_21
+}
 
 repositories {
 	mavenCentral()

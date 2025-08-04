@@ -27,6 +27,13 @@ services:
       - "8080:8080"
     depends_on:
       - postgres
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: travelmap
+      DB_USER: travelmap
+      DB_PASSWORD: travelmap
     networks:
       - travelmap-network
 
@@ -45,16 +52,3 @@ networks:
 
 volumes:
   postgres_data:
-
-
-## 네트워크 설정
-#networks:
-#  travelmap-network:
-#    driver: bridge
-#
-## 볼륨 설정
-#volumes:
-#  postgres_data:
-#    driver: local
-#  backend_logs:
-#    driver: local

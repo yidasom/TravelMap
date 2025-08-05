@@ -1,0 +1,5 @@
+containers:
+  - name: travelmap
+    image: yidasom/travelmap:latest
+    ports:
+      - containerPort: 8080

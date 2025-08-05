@@ -6,11 +6,11 @@ pipeline {
     }
 
     stages {
-        stage('Checkout') {
-            steps {
-                git 'https://github.com/yidasom/TravelMap.git'
-            }
-        }
+//         stage('Checkout') {
+//             steps {
+//                 git 'https://github.com/yidasom/TravelMap.git'
+//             }
+//         }
 
         stage('Build JAR') {
             steps {

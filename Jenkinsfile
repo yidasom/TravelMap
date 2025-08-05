@@ -11,7 +11,6 @@ pipeline {
 //                 git 'https://github.com/yidasom/TravelMap.git'
 //             }
 //         }
-
         stage('Build JAR') {
             steps {
                 dir('backend') {
@@ -22,13 +21,11 @@ pipeline {
 
         stage('Docker Build & Push') {
             steps {
-//                 withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-                    sh '''
-                        docker build -t $IMAGE_NAME -f backend/Dockerfile .
-                        echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
-                        docker push $IMAGE_NAME
-                    '''
-                }
+                sh '''
+                    docker build -t $IMAGE_NAME -f backend/Dockerfile .
+                    echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+                    docker push $IMAGE_NAME
+                '''
             }
         }
 

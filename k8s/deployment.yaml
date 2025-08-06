@@ -1,5 +1,21 @@
-containers:
-  - name: travelmap
-    image: somlh1212/travelmap:latest
-    ports:
-      - containerPort: 8080
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: travelmap-deployment
+  labels:
+    app: travelmap
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: travelmap
+  template:
+    metadata:
+      labels:
+        app: travelmap
+    spec:
+      containers:
+        - name: travelmap
+          image: somlh1212/travelmap:latest
+          ports:
+            - containerPort: 8080

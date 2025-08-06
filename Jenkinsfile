@@ -28,6 +28,8 @@ pipeline {
 
         stage('Deploy to K8s') {
             steps {
+                sh 'pwd'
+                sh 'ls -l'
                 sh 'kubectl apply -f k8s/deployment.yaml'
             }
         }

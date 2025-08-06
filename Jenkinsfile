@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        IMAGE_NAME = "yidasom/travelmap:latest"
+        IMAGE_NAME = "somlh1212/travelmap:latest"
     }
 
     stages {

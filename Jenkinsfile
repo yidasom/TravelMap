@@ -6,11 +6,12 @@ pipeline {
     }
 
     stages {
-//         stage('Checkout') {
-//             steps {
-//                 git 'https://github.com/yidasom/TravelMap.git'
-//             }
-//         }
+        stage('Checkout') {
+            steps {
+                git branch: 'main', url: 'https://github.com/yidasom/TravelMap.git'
+            }
+        }
+
         stage('Build JAR') {
             steps {
                 dir('backend') {
@@ -19,17 +20,22 @@ pipeline {
             }
         }
 
-        stage('Docker Build & Push') {
+        stage('Build Docker Image') {
+            steps {
+                sh 'docker build -t $IMAGE_NAME -f backend/Dockerfile .'
+            }
+        }
+
+        stage('Push Docker Image') {
             steps {
                 sh '''
-                    docker build -t $IMAGE_NAME -f backend/Dockerfile .
                     echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
                     docker push $IMAGE_NAME
                 '''
             }
         }
 
-        stage('Deploy to Kubernetes') {
+        stage('Deploy to K8s') {
             steps {
                 sh 'kubectl apply -f k8s/deployment.yaml'
             }

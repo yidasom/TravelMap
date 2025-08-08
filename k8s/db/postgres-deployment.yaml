@@ -21,7 +21,8 @@ spec:
             - name: POSTGRES_USER
               value: travelmap
             - name: POSTGRES_PASSWORD
-              value: dHJhdmVsbWFw
+              value: travelmap
+#              value: dHJhdmVsbWFw
           ports:
             - containerPort: 5432
           volumeMounts:

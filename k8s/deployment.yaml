@@ -22,3 +22,13 @@ spec:
           env:
             - name: SPRING_PROFILES_ACTIVE
               value: prod
+            - name: DB_HOST
+              value: postgres
+            - name: DB_PORT
+              value: "5432"
+            - name: DB_NAME
+              value: travelmap
+            - name: DB_USER
+              value: travelmap
+            - name: DB_PASSWORD
+              value: travelmap

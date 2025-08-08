@@ -38,7 +38,7 @@ dependencies {
 	
 	// Development
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
-	runtimeOnly 'org.postgresql:postgresql'
+	implementation 'org.postgresql:postgresql'
 	
 	// Testing
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'

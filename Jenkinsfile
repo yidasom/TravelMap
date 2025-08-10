@@ -12,6 +12,7 @@ pipeline {
         stage('Build Backend') {
             steps {
                 dir('backend') {
+                    // 모든 캐시를 지우고 다시 빌드
                     sh './gradlew clean build'
                 }
             }
@@ -19,8 +20,10 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                // 고유한 태그와 'latest' 태그, 두 개의 태그로 이미지를 빌드합니다.
-                sh "docker build -t ${IMAGE_NAME} -t ${IMAGE_LATEST_NAME} -f backend/Dockerfile ."
+                dir('backend') {
+                    // 고유한 태그와 'latest' 태그, 두 개의 태그로 이미지를 빌드합니다.
+                    sh "docker build -t ${IMAGE_NAME} -t ${IMAGE_LATEST_NAME} -f Dockerfile ."
+                }
             }
         }
 
@@ -42,14 +45,19 @@ pipeline {
                 // PostgreSQL 배포가 완료될 때까지 대기
                 sh 'kubectl rollout status deployment/postgres'
 
-                // 애플리케이션 Deployment를 배포하기 전에 Secret을 먼저 배포 🔑
+                // Secret을 먼저 배포 🔑
                 sh 'kubectl apply -f k8s/secret.yaml'
 
-                // PostgreSQL이 준비된 후에 애플리케이션을 배포합니다.
-                // 이전에 'kubectl apply'를 사용했으나, 이제는 'kubectl set image'를 사용해
-                // 이미지 태그를 직접 업데이트하여 강제로 재배포를 유도합니다.
-                sh "kubectl set image deployment/travelmap-deployment travelmap=${IMAGE_NAME}"
+                // `k8s/deployment.yaml` 파일의 이미지 태그를 최신 빌드 태그로 수정합니다.
+                sh "sed -i 's|travelmap:latest|travelmap:${IMAGE_TAG}|g' k8s/deployment.yaml"
+
+                // 수정된 Deployment를 배포합니다.
+                sh 'kubectl apply -f k8s/deployment.yaml'
+
+                // Deployment가 완료될 때까지 대기
                 sh 'kubectl rollout status deployment/travelmap-deployment'
+
+                // Service 배포
                 sh 'kubectl apply -f k8s/service.yaml'
             }
         }

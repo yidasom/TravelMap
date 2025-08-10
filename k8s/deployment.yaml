@@ -19,16 +19,13 @@ spec:
           image: somlh1212/travelmap:latest
           ports:
             - containerPort: 8080
+          imagePullPolicy: Always # 항상 새로운 이미지 만듦. todo 이후 수정 필요
           env:
             - name: SPRING_PROFILES_ACTIVE
               value: prod
-            - name: DB_HOST
-              value: postgres
-            - name: DB_PORT
-              value: "5432"
-            - name: DB_NAME
+            - name: SPRING_DATASOURCE_URL # 이 부분만 남기고,
+              value: jdbc:postgresql://postgres:5432/travelmap # 완성된 URL을 직접 입력합니다.
+            - name: SPRING_DATASOURCE_USERNAME
               value: travelmap
-            - name: DB_USER
-              value: travelmap
-            - name: DB_PASSWORD
+            - name: SPRING_DATASOURCE_PASSWORD
               value: travelmap

@@ -29,12 +29,17 @@ pipeline {
 
         stage('Deploy to K8s') {
             steps {
-                sh 'kubectl apply -f k8s/deployment.yaml'
-                sh 'kubectl apply -f k8s/service.yaml'
-                // DB 관련 파일들도 배포 로직에 포함
+                // DB 관련 파일 먼저 배포
                 sh 'kubectl apply -f k8s/db/postgres-pv.yaml'
                 sh 'kubectl apply -f k8s/db/postgres-pvc.yaml'
                 sh 'kubectl apply -f k8s/db/postgres-deployment.yaml'
+
+                // 이 부분이 중요합니다. PostgreSQL 배포가 완료될 때까지 기다립니다.
+                sh 'kubectl rollout status deployment/postgres'
+
+                // PostgreSQL이 준비된 후에 애플리케이션을 배포합니다.
+                sh 'kubectl apply -f k8s/deployment.yaml'
+                sh 'kubectl apply -f k8s/service.yaml'
             }
         }
     }

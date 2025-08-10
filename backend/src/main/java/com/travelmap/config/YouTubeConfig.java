@@ -16,8 +16,8 @@ public class YouTubeConfig {
     @Value("${youtube.api.key}")
     private String apiKey;
     
-    @Value("${youtube.api.application-name}")
-    private String applicationName;
+//    @Value("${youtube.api.application-name}")
+    private String applicationName = "TravelMap";
     
     @Bean
     public YouTube youTube() throws GeneralSecurityException, IOException {

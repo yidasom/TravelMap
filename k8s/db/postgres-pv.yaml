@@ -4,8 +4,9 @@ metadata:
   name: postgres-pv
 spec:
   capacity:
-    storage: 1Gi
+    storage: 5Gi    # PVC 요청과 맞춤
   accessModes:
     - ReadWriteOnce
+  storageClassName: standard  # PVC와 맞춤
   hostPath:
     path: "/data/postgres"

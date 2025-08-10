@@ -22,7 +22,6 @@ spec:
               value: travelmap
             - name: POSTGRES_PASSWORD
               value: travelmap
-#              value: dHJhdmVsbWFw
           ports:
             - containerPort: 5432
           volumeMounts:
@@ -31,18 +30,7 @@ spec:
       volumes:
         - name: postgres-data
           persistentVolumeClaim:
-            claimName: postgres-pvc
----
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: postgres-pvc
-spec:
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: 5Gi
+            claimName: postgres-pvc # PVC 이름만 참조하도록 변경
 ---
 apiVersion: v1
 kind: Service

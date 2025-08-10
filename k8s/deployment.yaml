@@ -23,9 +23,17 @@ spec:
           env:
             - name: SPRING_PROFILES_ACTIVE
               value: prod
-            - name: SPRING_DATASOURCE_URL # 이 부분만 남기고,
-              value: jdbc:postgresql://postgres:5432/travelmap # 완성된 URL을 직접 입력합니다.
+            - name: SPRING_DATASOURCE_URL
+              value: jdbc:postgresql://postgres:5432/travelmap
             - name: SPRING_DATASOURCE_USERNAME
               value: travelmap
-            - name: SPRING_DATASOURCE_PASSWORD
-              value: travelmap
+            - name: YOUTUBE_API_KEY # 유튜브 API 키는 이제 Secret에서 가져옵니다.
+              valueFrom:
+                secretKeyRef:
+                  name: travelmap-secret
+                  key: youtube-api-key
+            - name: SPRING_DATASOURCE_PASSWORD # DB 비밀번호도 Secret에서 가져옵니다.
+              valueFrom:
+                secretKeyRef:
+                  name: travelmap-secret
+                  key: db-password

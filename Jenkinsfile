@@ -39,8 +39,11 @@ pipeline {
                 sh 'kubectl apply -f k8s/db/postgres-pvc.yaml'
                 sh 'kubectl apply -f k8s/db/postgres-deployment.yaml'
 
-                // PostgreSQL 배포가 완료될 때까지 기다립니다.
+                // PostgreSQL 배포가 완료될 때까지 대기
                 sh 'kubectl rollout status deployment/postgres'
+
+                // 애플리케이션 Deployment를 배포하기 전에 Secret을 먼저 배포 🔑
+                sh 'kubectl apply -f k8s/secret.yaml'
 
                 // PostgreSQL이 준비된 후에 애플리케이션을 배포합니다.
                 // 이전에 'kubectl apply'를 사용했으나, 이제는 'kubectl set image'를 사용해

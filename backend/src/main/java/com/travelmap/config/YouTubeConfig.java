@@ -15,10 +15,10 @@ public class YouTubeConfig {
     
     @Value("${youtube.api.key}")
     private String apiKey;
-    
-//    @Value("${youtube.api.application-name}")
-    private String applicationName = "TravelMap";
-    
+
+    @Value("${youtube.api.application-name:TravelMap}")
+    private String applicationName;
+
     @Bean
     public YouTube youTube() throws GeneralSecurityException, IOException {
         return new YouTube.Builder(

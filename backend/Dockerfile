@@ -11,6 +11,6 @@
 
 FROM openjdk:21-slim-buster
 WORKDIR /app
-COPY backend/build/libs/*.jar app.jar
+COPY build/libs/*.jar app.jar
 EXPOSE 8080
 CMD ["java", "-jar", "app.jar"]

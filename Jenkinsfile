@@ -22,7 +22,7 @@ pipeline {
             steps {
                 dir('backend') {
                     // 고유한 태그와 'latest' 태그, 두 개의 태그로 이미지를 빌드합니다.
-                    sh "docker build -t ${IMAGE_NAME} -t ${IMAGE_LATEST_NAME} -f Dockerfile ."
+                    sh "docker build -t ${IMAGE_NAME} -t ${IMAGE_LATEST_NAME} ."
                 }
             }
         }

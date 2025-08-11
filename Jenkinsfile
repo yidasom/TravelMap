@@ -1,6 +1,10 @@
 pipeline {
     agent any
 
+    tools {
+        nodejs 'NodeJS'
+    }
+
     environment {
         // 백엔드 이미지 정보
         BACKEND_IMAGE_TAG = "${env.BUILD_NUMBER}"

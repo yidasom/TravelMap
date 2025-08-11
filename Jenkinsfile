@@ -37,6 +37,8 @@ pipeline {
 
         stage('Deploy to K8s') {
             steps {
+                // Secret을 먼저 배포 🔑
+                sh 'kubectl apply -f /home/jenkins/k8s/secret.yaml'
                 // DB 관련 파일 먼저 배포
                 sh 'kubectl apply -f k8s/db/postgres-pv.yaml'
                 sh 'kubectl apply -f k8s/db/postgres-pvc.yaml'
@@ -44,9 +46,6 @@ pipeline {
 
                 // PostgreSQL 배포가 완료될 때까지 대기
                 sh 'kubectl rollout status deployment/postgres'
-
-                // Secret을 먼저 배포 🔑
-                sh 'kubectl apply -f k8s/secret.yaml'
 
                 // `k8s/deployment.yaml` 파일의 이미지 태그를 최신 빌드 태그로 수정합니다.
                 sh "sed -i 's|travelmap:latest|travelmap:${IMAGE_TAG}|g' k8s/deployment.yaml"

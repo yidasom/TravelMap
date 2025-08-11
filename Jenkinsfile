@@ -40,8 +40,8 @@ pipeline {
                 // Secret을 먼저 배포 🔑
                 sh 'kubectl apply -f /home/jenkins/k8s/secret.yaml'
                 // DB 관련 파일 먼저 배포
-                sh 'kubectl apply -f k8s/db/postgres-pv.yaml'
-                sh 'kubectl apply -f k8s/db/postgres-pvc.yaml'
+                sh 'kubectl apply -f k8s/db/new-postgres-pv.yaml'
+                sh 'kubectl apply -f k8s/db/new-postgres-pvc.yaml'
                 sh 'kubectl apply -f k8s/db/postgres-deployment.yaml'
 
                 // PostgreSQL 배포가 완료될 때까지 대기

@@ -1,0 +1,22 @@
+piVersion: apps/v1
+kind: Deployment
+metadata:
+  name: travelmap-frontend-deployment
+  labels:
+    app: travelmap-frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: travelmap-frontend
+  template:
+    metadata:
+      labels:
+        app: travelmap-frontend
+    spec:
+      containers:
+        - name: travelmap-frontend
+          # 이미지 이름과 태그를 Jenkinsfile과 일치시켜야 합니다.
+          image: somlh1212/travelmap-frontend:latest
+          ports:
+            - containerPort: 80 # Nginx는 기본적으로 80 포트를 사용합니다.

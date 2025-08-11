@@ -2,10 +2,15 @@ pipeline {
     agent any
 
     environment {
-        // 빌드 번호를 포함한 고유한 이미지 태그를 생성합니다.
-        IMAGE_TAG = "${env.BUILD_NUMBER}"
-        IMAGE_NAME = "somlh1212/travelmap:${IMAGE_TAG}"
-        IMAGE_LATEST_NAME = "somlh1212/travelmap:latest"
+        // 백엔드 이미지 정보
+        BACKEND_IMAGE_TAG = "${env.BUILD_NUMBER}"
+        BACKEND_IMAGE_NAME = "somlh1212/travelmap-backend:${BACKEND_IMAGE_TAG}"
+        BACKEND_IMAGE_LATEST_NAME = "somlh1212/travelmap-backend:latest"
+
+        // 프론트엔드 이미지 정보
+        FRONTEND_IMAGE_TAG = "${env.BUILD_NUMBER}"
+        FRONTEND_IMAGE_NAME = "somlh1212/travelmap-frontend:${FRONTEND_IMAGE_TAG}"
+        FRONTEND_IMAGE_LATEST_NAME = "somlh1212/travelmap-frontend:latest"
     }
 
     stages {
@@ -18,28 +23,54 @@ pipeline {
             }
         }
 
-        stage('Build Docker Image') {
+        stage('Build Backend Docker Image') {
             steps {
                 dir('backend') {
-                    // 고유한 태그와 'latest' 태그, 두 개의 태그로 이미지를 빌드합니다.
-                    sh "docker build -t ${IMAGE_NAME} -t ${IMAGE_LATEST_NAME} ."
+                    // 백엔드 이미지를 빌드하고 태그를 지정합니다.
+                    sh "docker build -t ${BACKEND_IMAGE_NAME} -t ${BACKEND_IMAGE_LATEST_NAME} ."
                 }
             }
         }
 
-        stage('Push Docker Image') {
+        stage('Push Backend Docker Image') {
             steps {
-                // 두 개의 이미지를 모두 Docker Hub에 푸시합니다.
-                sh "docker push ${IMAGE_NAME}"
-                sh "docker push ${IMAGE_LATEST_NAME}"
+                // 백엔드 이미지를 Docker Hub에 푸시합니다.
+                sh "docker push ${BACKEND_IMAGE_NAME}"
+                sh "docker push ${BACKEND_IMAGE_LATEST_NAME}"
+            }
+        }
+
+        stage('Build Frontend') {
+            steps {
+                dir('frontend') {
+                    // npm 의존성 설치 및 빌드
+                    sh 'npm install'
+                    sh 'npm run build'
+                }
+            }
+        }
+
+        stage('Build Frontend Docker Image') {
+            steps {
+                dir('frontend') {
+                    // 프론트엔드 이미지를 빌드하고 태그를 지정합니다.
+                    sh "docker build -t ${FRONTEND_IMAGE_NAME} -t ${FRONTEND_IMAGE_LATEST_NAME} ."
+                }
+            }
+        }
+
+        stage('Push Frontend Docker Image') {
+            steps {
+                // 프론트엔드 이미지를 Docker Hub에 푸시합니다.
+                sh "docker push ${FRONTEND_IMAGE_NAME}"
+                sh "docker push ${FRONTEND_IMAGE_LATEST_NAME}"
             }
         }
 
         stage('Deploy to K8s') {
             steps {
-                // Secret을 먼저 배포 🔑
+                // Secret, PV, PVC는 한 번만 배포하면 됩니다.
                 sh 'kubectl apply -f /home/jenkins/k8s/secret.yaml'
-                // DB 관련 파일 먼저 배포
                 sh 'kubectl apply -f k8s/db/new-postgres-pv.yaml'
                 sh 'kubectl apply -f k8s/db/new-postgres-pvc.yaml'
                 sh 'kubectl apply -f k8s/db/postgres-deployment.yaml'
@@ -47,17 +78,21 @@ pipeline {
                 // PostgreSQL 배포가 완료될 때까지 대기
                 sh 'kubectl rollout status deployment/postgres'
 
-                // `k8s/deployment.yaml` 파일의 이미지 태그를 최신 빌드 태그로 수정합니다.
-                sh "sed -i 's|travelmap:latest|travelmap:${IMAGE_TAG}|g' k8s/deployment.yaml"
+                // 프론트엔드와 백엔드 Deployment를 최신 태그로 수정합니다.
+                sh "sed -i 's|travelmap-backend:latest|travelmap-backend:${BACKEND_IMAGE_TAG}|g' k8s/deployment.yaml"
+                sh "sed -i 's|travelmap-frontend:latest|travelmap-frontend:${FRONTEND_IMAGE_TAG}|g' k8s/frontend-deployment.yaml"
 
-                // 수정된 Deployment를 배포합니다.
+                // 백엔드와 프론트엔드 Deployment를 배포합니다.
                 sh 'kubectl apply -f k8s/deployment.yaml'
+                sh 'kubectl apply -f k8s/frontend-deployment.yaml'
 
-                // Deployment가 완료될 때까지 대기
+                // 모든 Deployment가 완료될 때까지 대기
                 sh 'kubectl rollout status deployment/travelmap-deployment'
+                sh 'kubectl rollout status deployment/travelmap-frontend-deployment'
 
-                // Service 배포
+                // 백엔드와 프론트엔드 Service를 배포합니다.
                 sh 'kubectl apply -f k8s/service.yaml'
+                sh 'kubectl apply -f k8s/frontend-service.yaml'
             }
         }
     }

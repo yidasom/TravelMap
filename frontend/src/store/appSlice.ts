@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import { AppState, FilterState, FilterOptions, MapData, Video } from '../types';
+import { AppState, FilterState, Video } from '../types';
 import { apiService } from '../services/api';
 
 // 초기 상태

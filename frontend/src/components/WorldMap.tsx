@@ -148,7 +148,6 @@ const MapBounds: React.FC<{ countries: CountryData[] }> = ({ countries }) => {
 
   // 줌 레벨 변화에 따른 동적 경계 조정
   useEffect(() => {
-    let originalBounds: L.LatLngBounds | null = null;
     
     const handleZoomEnd = () => {
       const currentZoom = map.getZoom();

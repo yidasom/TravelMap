@@ -58,7 +58,6 @@ const MainApp: React.FC = () => {
     filterOptions,
     mapData,
     videos,
-    selectedVideo,
     loading,
     error,
   } = useAppSelector((state) => state.app);

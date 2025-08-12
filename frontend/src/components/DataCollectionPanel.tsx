@@ -20,7 +20,6 @@ import {
 } from '@mui/material';
 import {
   PlayArrow,
-  Stop,
   Refresh,
   Add,
   ExpandMore,

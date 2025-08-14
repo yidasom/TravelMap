@@ -1,0 +1,110 @@
+pipeline {
+    agent any
+
+    tools {
+        nodejs 'NodeJS'
+    }
+
+    environment {
+        // 백엔드 이미지 정보
+        BACKEND_IMAGE_TAG = "${env.BUILD_NUMBER}"
+        BACKEND_IMAGE_NAME = "somlh1212/travelmap-backend:${BACKEND_IMAGE_TAG}"
+        BACKEND_IMAGE_LATEST_NAME = "somlh1212/travelmap-backend:latest"
+
+        // 프론트엔드 이미지 정보
+        FRONTEND_IMAGE_TAG = "${env.BUILD_NUMBER}"
+        FRONTEND_IMAGE_NAME = "somlh1212/travelmap-frontend:${FRONTEND_IMAGE_TAG}"
+        FRONTEND_IMAGE_LATEST_NAME = "somlh1212/travelmap-frontend:latest"
+
+        // GKE 정보
+        GCP_CREDENTIALS = credentials('gke-credentials')
+        GKE_PROJECT = 'cogent-spirit-468810-j1' // GCP 프로젝트 ID
+        GKE_REGION = 'asia-northeast3'
+        GKE_CLUSTER_NAME = 'travelmap-cluster'
+    }
+
+    stages {
+        stage('Build Backend') {
+            steps {
+                dir('backend') {
+                    // 모든 캐시를 지우고 다시 빌드
+                    sh './gradlew clean build'
+                }
+            }
+        }
+
+        stage('Build Backend Docker Image') {
+            steps {
+                dir('backend') {
+                    // 백엔드 이미지를 빌드하고 태그를 지정합니다.
+                    sh "docker build -t ${BACKEND_IMAGE_NAME} -t ${BACKEND_IMAGE_LATEST_NAME} ."
+                }
+            }
+        }
+
+        stage('Push Backend Docker Image') {
+            steps {
+                // 백엔드 이미지를 Docker Hub에 푸시합니다.
+                sh "docker push ${BACKEND_IMAGE_NAME}"
+                sh "docker push ${BACKEND_IMAGE_LATEST_NAME}"
+            }
+        }
+
+        stage('Build Frontend') {
+            steps {
+                dir('frontend') {
+                    // npm 의존성 설치 및 빌드
+                    sh 'npm install'
+                    sh 'npm run build'
+                }
+            }
+        }
+
+        stage('Build Frontend Docker Image') {
+            steps {
+                dir('frontend') {
+                    // 프론트엔드 이미지를 빌드하고 태그를 지정합니다.
+                    sh "docker build -t ${FRONTEND_IMAGE_NAME} -t ${FRONTEND_IMAGE_LATEST_NAME} ."
+                }
+            }
+        }
+
+        stage('Push Frontend Docker Image') {
+            steps {
+                // 프론트엔드 이미지를 Docker Hub에 푸시합니다.
+                sh "docker push ${FRONTEND_IMAGE_NAME}"
+                sh "docker push ${FRONTEND_IMAGE_LATEST_NAME}"
+            }
+        }
+
+        stage('Deploy to GKE') {
+            steps {
+                script {
+                    // gcloud CLI를 사용하여 GKE 클러스터에 인증
+                    withCredentials([file(credentialsId: GCP_CREDENTIALS, variable: 'GCP_SERVICE_KEY')]) {
+                        sh "gcloud auth activate-service-account --key-file=${GCP_SERVICE_KEY}"
+                        sh "gcloud container clusters get-credentials ${GKE_CLUSTER_NAME} --region ${GKE_REGION} --project ${GKE_PROJECT}"
+                    }
+                }
+
+                // GKE용 YAML 파일들만 사용
+                sh 'kubectl apply -f /home/jenkins/k8s/secret.yaml'
+                sh 'kubectl apply -f k8s/db/gke-postgres-pvc.yaml'
+                sh 'kubectl apply -f k8s/db/postgres-deployment.yaml'
+
+                sh 'kubectl rollout status deployment/postgres'
+
+                sh "sed -i 's|travelmap-backend:latest|travelmap-backend:${BACKEND_IMAGE_TAG}|g' k8s/deployment.yaml"
+                sh "sed -i 's|travelmap-frontend:latest|travelmap-frontend:${FRONTEND_IMAGE_TAG}|g' k8s/frontend-deployment.yaml"
+                sh 'kubectl apply -f k8s/deployment.yaml'
+                sh 'kubectl apply -f k8s/frontend-deployment.yaml'
+
+                // 모든 Deployment가 완료될 때까지 대기
+                sh 'kubectl rollout status deployment/travelmap-deployment'
+                sh 'kubectl rollout status deployment/travelmap-frontend-deployment'
+
+                sh 'kubectl apply -f k8s/gke-service.yaml'
+            }
+        }
+    }
+}

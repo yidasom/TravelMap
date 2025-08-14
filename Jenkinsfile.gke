@@ -17,7 +17,7 @@ pipeline {
         FRONTEND_IMAGE_LATEST_NAME = "somlh1212/travelmap-frontend:latest"
 
         // GKE 정보
-        GCP_CREDENTIALS = credentials('gke-credentials')
+//        GCP_CREDENTIALS = credentials('gke-credentials')
         GKE_PROJECT = 'cogent-spirit-468810-j1' // GCP 프로젝트 ID
         GKE_REGION = 'asia-northeast3'
         GKE_CLUSTER_NAME = 'travelmap-cluster'
@@ -81,7 +81,7 @@ pipeline {
             steps {
                 script {
                     // gcloud CLI를 사용하여 GKE 클러스터에 인증
-                    withCredentials([file(credentialsId: GCP_CREDENTIALS, variable: 'GCP_SERVICE_KEY')]) {
+                    withCredentials([file(credentialsId: 'gke-credentials', variable: 'GCP_SERVICE_KEY')]) {
                         sh "gcloud auth activate-service-account --key-file=${GCP_SERVICE_KEY}"
                         sh "gcloud container clusters get-credentials ${GKE_CLUSTER_NAME} --region ${GKE_REGION} --project ${GKE_PROJECT}"
                     }

@@ -3,12 +3,15 @@ WORKDIR /app
 COPY . .
 RUN npm install && npm run build
 
-# nginx
+# nginx entrypoint 추출
+FROM nginx:alpine AS nginx_stage
+
 FROM nginx:alpine
-COPY docker-entrypoint.sh /docker-entrypoint.sh
+COPY --from=nginx_stage /docker-entrypoint.sh /docker-entrypoint.sh
 RUN chmod +x /docker-entrypoint.sh
 
 COPY --from=builder /app/build /usr/share/nginx/html
 
 EXPOSE 80
+ENTRYPOINT ["/docker-entrypoint.sh"]
 CMD ["nginx", "-g", "daemon off;"]

@@ -54,6 +54,7 @@ pipeline {
             steps {
                 dir('frontend') {
                     // npm 의존성 설치 및 빌드
+                    sh 'dos2unix docker-entrypoint.sh'
                     sh 'npm install'
                     sh 'npm run build'
                 }

@@ -5,7 +5,7 @@ RUN npm install && npm run build
 
 FROM nginx:alpine
 
-RUN apt-get update && apt-get install -y dos2unix
+RUN apk update && apk install -y dos2unix
 COPY --chown=nginx:nginx ../docker-entrypoint.sh /docker-entrypoint.sh
 RUN dos2unix /docker-entrypoint.sh
 

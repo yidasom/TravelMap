@@ -52,10 +52,8 @@ pipeline {
 
         stage('Build Frontend') {
             steps {
-                sh 'sudo ln -s /usr/bin/dos2unix.aarch64 /usr/bin/dos2unix || true'
-                sh 'dos2unix docker-entrypoint.sh'
                 dir('frontend') {
-                    sh 'npm cache clean --force'
+                    // npm 의존성 설치 및 빌드
                     sh 'npm install'
                     sh 'npm run build'
                 }

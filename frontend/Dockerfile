@@ -3,7 +3,7 @@ WORKDIR /app
 COPY . .
 RUN npm install && npm run build
 
-FROM nginx:alpine
+FROM --platform=linux/amd64 nginx:alpine
 
 RUN apk update && apk install -y dos2unix
 COPY --chown=nginx:nginx ../docker-entrypoint.sh /docker-entrypoint.sh

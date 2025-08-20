@@ -37,7 +37,7 @@ pipeline {
             steps {
                 dir('backend') {
                     // 백엔드 이미지를 빌드하고 태그를 지정합니다.
-                    sh "docker build --platform=linux/amd64 -t ${BACKEND_IMAGE_NAME} -t ${BACKEND_IMAGE_LATEST_NAME} ."
+                    sh "docker build -t ${BACKEND_IMAGE_NAME} -t ${BACKEND_IMAGE_LATEST_NAME} ."
                 }
             }
         }
@@ -64,7 +64,7 @@ pipeline {
             steps {
                 dir('frontend') {
                     // 프론트엔드 이미지를 빌드하고 태그를 지정합니다.
-                    sh "docker build --platform=linux/amd64 -t ${FRONTEND_IMAGE_NAME} -t ${FRONTEND_IMAGE_LATEST_NAME} ."
+                    sh "docker build -t ${FRONTEND_IMAGE_NAME} -t ${FRONTEND_IMAGE_LATEST_NAME} ."
                 }
             }
         }

@@ -1,9 +1,9 @@
-FROM --platform=linux/amd64 node:18-alpine AS builder
+FROM node:18-alpine AS builder
 WORKDIR /app
 COPY . .
 RUN npm install && npm run build
 
-FROM --platform=linux/amd64 alpine AS dos2unix-stage
+FROM alpine AS dos2unix-stage
 RUN apk update && apk add dos2unix
 
 # Copy docker-entrypoint.sh to the dos2unix-stage and fix CRLF issues
@@ -11,7 +11,7 @@ WORKDIR /app
 COPY ../docker-entrypoint.sh .
 RUN dos2unix docker-entrypoint.sh
 
-FROM --platform=linux/amd64 nginx:alpine
+FROM nginx:alpine
 
 COPY --from=dos2unix-stage /app/docker-entrypoint.sh /docker-entrypoint.sh
 

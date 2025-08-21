@@ -85,6 +85,10 @@ pipeline {
                         sh "gcloud auth activate-service-account --key-file=${GCP_SERVICE_KEY}"
                         sh "gcloud container clusters get-credentials ${GKE_CLUSTER_NAME} --region ${GKE_REGION} --project ${GKE_PROJECT}"
                     }
+                    withCredentials([file(credentialsId: 'gke-credentials', variable: 'GCP_SERVICE_KEY')]) {
+                        sh 'gcloud auth activate-service-account --key-file=${GCP_SERVICE_KEY}'
+                        sh 'gcloud container clusters get-credentials ${GKE_CLUSTER_NAME} --region ${GKE_REGION} --project ${GKE_PROJECT}'
+                    }
                 }
 
                 // GKE용 YAML 파일들만 사용

@@ -87,6 +87,10 @@ pipeline {
                     }
                 }
 
+                // 권한 확인 명령어 추가
+                sh 'kubectl auth can-i get pods'
+                sh 'kubectl get pods'
+
                 // GKE용 YAML 파일들만 사용
                 sh 'kubectl apply -f /home/jenkins/k8s/secret.yaml'
                 sh 'kubectl apply -f k8s/db/gke-postgres-pvc.yaml'

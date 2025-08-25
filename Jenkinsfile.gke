@@ -82,10 +82,6 @@ pipeline {
                 script {
                     // gcloud CLI를 사용하여 GKE 클러스터에 인증
                     withCredentials([file(credentialsId: 'gke-credentials', variable: 'GCP_SERVICE_KEY')]) {
-                        sh "gcloud auth activate-service-account --key-file=${GCP_SERVICE_KEY}"
-                        sh "gcloud container clusters get-credentials ${GKE_CLUSTER_NAME} --region ${GKE_REGION} --project ${GKE_PROJECT}"
-                    }
-                    withCredentials([file(credentialsId: 'gke-credentials', variable: 'GCP_SERVICE_KEY')]) {
                         sh 'gcloud auth activate-service-account --key-file=${GCP_SERVICE_KEY}'
                         sh 'gcloud container clusters get-credentials ${GKE_CLUSTER_NAME} --region ${GKE_REGION} --project ${GKE_PROJECT}'
                     }

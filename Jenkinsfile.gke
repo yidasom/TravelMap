@@ -101,7 +101,19 @@ pipeline {
 
                 // 모든 Deployment가 완료될 때까지 대기
                 sh 'kubectl rollout status deployment/travelmap-deployment'
-                sh 'kubectl rollout status deployment/travelmap-frontend-deployment'
+
+                // 프론트엔드 배포 실패 시 디버깅 정보 출력
+                script {
+                    try {
+                        sh 'kubectl rollout status deployment/travelmap-frontend-deployment'
+                    } catch (err) {
+                        echo 'Frontend deployment rollout failed. Gathering troubleshooting information...'
+                        sh 'kubectl get pods -l app=travelmap-frontend'
+                        sh 'kubectl describe deployment travelmap-frontend-deployment'
+                        sh 'kubectl logs $(kubectl get pods -l app=travelmap-frontend -o jsonpath="{.items[0].metadata.name}")'
+                        throw err
+                    }
+                }
 
                 sh 'kubectl apply -f k8s/gke-service.yaml'
             }

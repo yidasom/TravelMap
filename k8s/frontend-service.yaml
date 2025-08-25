@@ -3,11 +3,11 @@ kind: Service
 metadata:
   name: travelmap-frontend-service
 spec:
-  type: LoadBalancer # NodePort에서 LoadBalancer로 변경
+  type: NodePort
   selector:
     app: travelmap-frontend
   ports:
     - protocol: TCP
       port: 80
       targetPort: 80
-#      nodePort: 30081 # 백엔드와 다른 포트를 사용해야 합니다.
+      nodePort: 30081 # 백엔드와 다른 포트를 사용해야 합니다.

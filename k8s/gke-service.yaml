@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: travelmap-frontend-service
+  name: travelmap-gke-frontend-service
   annotations:
     # GKE LoadBalancer에 외부 IP를 할당하도록 명시적으로 설정합니다.
     networking.gke.io/load-balancer-type: "External"

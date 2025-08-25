@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: travelmap
-          image: somlh1212/travelmap:latest
+          image: somlh1212/travelmap-backend:latest
           ports:
             - containerPort: 8080
           imagePullPolicy: Always # 항상 새로운 이미지 만듦. todo 이후 수정 필요

@@ -16,9 +16,11 @@ pipeline {
         FRONTEND_IMAGE_NAME = "somlh1212/travelmap-frontend:${FRONTEND_IMAGE_TAG}"
         FRONTEND_IMAGE_LATEST_NAME = "somlh1212/travelmap-frontend:latest"
 
+        // Node.js 빌드 시 메모리 제한 증가
+        NODE_OPTIONS = "--max_old_space_size=4096" // Increased to 4GB to be safe
+
         // GKE 정보
-//        GCP_CREDENTIALS = credentials('gke-credentials')
-        GKE_PROJECT = 'cogent-spirit-468810-j1' // GCP 프로젝트 ID
+        GKE_PROJECT = 'cogent-spirit-468810-j1'
         GKE_REGION = 'asia-northeast3'
         GKE_CLUSTER_NAME = 'travelmap-cluster'
     }
@@ -61,8 +63,8 @@ pipeline {
                 dir('frontend') {
                     sh """
                 docker buildx create --use || true
-                docker buildx build --platform linux/amd64,linux/arm64 \
-                  -t ${FRONTEND_IMAGE_NAME} -t ${FRONTEND_IMAGE_LATEST_NAME} \
+                docker buildx build --platform linux/amd64,linux/arm64 \\
+                  -t ${FRONTEND_IMAGE_NAME} -t ${FRONTEND_IMAGE_LATEST_NAME} \\
                   --push .
             """
                 }
@@ -79,15 +81,12 @@ pipeline {
                     }
                 }
 
-                // 권한 확인 명령어 추가
-                sh 'kubectl auth can-i get pods'
-                sh 'kubectl get pods'
-
                 // GKE용 YAML 파일들만 사용
                 sh 'kubectl apply -f /home/jenkins/k8s/secret.yaml'
                 sh 'kubectl apply -f k8s/db/gke-postgres-pvc.yaml'
                 sh 'kubectl apply -f k8s/db/postgres-deployment.yaml'
 
+                // PostgreSQL 배포가 완료될 때까지 대기
                 sh 'kubectl rollout status deployment/postgres'
 
                 sh "sed -i 's|travelmap-backend:latest|travelmap-backend:${BACKEND_IMAGE_TAG}|g' k8s/deployment.yaml"
@@ -97,22 +96,9 @@ pipeline {
 
                 // 모든 Deployment가 완료될 때까지 대기
                 sh 'kubectl rollout status deployment/travelmap-deployment'
+                sh 'kubectl rollout status deployment/travelmap-frontend-deployment'
 
                 sh 'kubectl apply -f k8s/gke-backend-service.yaml'
-
-                // 프론트엔드 배포 실패 시 디버깅 정보 출력
-                script {
-                    try {
-                        sh 'kubectl rollout status deployment/travelmap-frontend-deployment'
-                    } catch (err) {
-                        echo 'Frontend deployment rollout failed. Gathering troubleshooting information...'
-                        sh 'kubectl get pods -l app=travelmap-frontend'
-                        sh 'kubectl describe deployment travelmap-frontend-deployment'
-                        sh 'kubectl logs $(kubectl get pods -l app=travelmap-frontend -o jsonpath="{.items[0].metadata.name}")'
-                        throw err
-                    }
-                }
-
                 sh 'kubectl apply -f k8s/gke-frontend-service.yaml'
             }
         }

@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: travelmap-gke-backend-service
+spec:
+  type: LoadBalancer
+  selector:
+    app: travelmap-backend
+  ports:
+    - protocol: TCP
+      port: 80 # 외부에서 접근할 포트
+      targetPort: 8080

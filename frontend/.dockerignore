@@ -1,0 +1,7 @@
+# 무시할 파일/폴더
+.zsh_history
+.git
+node_modules
+npm-debug.log
+Dockerfile
+.dockerignore

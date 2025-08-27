@@ -103,13 +103,11 @@ EOF
                 // PostgreSQL 배포가 완료될 때까지 대기
                 sh 'kubectl rollout status deployment/postgres'
 
-                // macOS/BSD sed 호환성을 위해 백업 파일명 추가
-                sh """
-                    sed -i '' "s|travelmap-backend:latest|travelmap-backend:${BACKEND_IMAGE_TAG}|g" k8s/deployment.yaml
-                """
-                sh """
-                    sed -i '' "s|travelmap-frontend:latest|travelmap-frontend:${FRONTEND_IMAGE_TAG}|g" k8s/frontend-deployment.yaml
-                """
+                sh 'export BACKEND_TAG="${BACKEND_IMAGE_TAG}"'
+                sh 'sed -i '' "s|travelmap-backend:latest|travelmap-backend:${BACKEND_TAG}|g" k8s/deployment.yaml'
+
+                sh 'export FRONTEND_TAG="${FRONTEND_IMAGE_TAG}"'
+                sh 'sed -i '' "s|travelmap-frontend:latest|travelmap-frontend:${FRONTEND_TAG}|g" k8s/frontend-deployment.yaml'
 
                 sh 'kubectl apply -f k8s/deployment.yaml'
                 sh 'kubectl apply -f k8s/frontend-deployment.yaml'

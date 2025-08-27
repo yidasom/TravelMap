@@ -89,7 +89,7 @@ EOF
         stage('Deploy to GKE') {
             steps {
                 script {
-                    withCredentials([string(credentialsId: 'gke-credentials', variable: 'GCP_SERVICE_KEY_JSON')]) {
+                    withCredentials([file(credentialsId: 'gke-credentials', variable: 'GCP_SERVICE_KEY_FILE')]) {
                         sh "echo \$GCP_SERVICE_KEY_JSON > gcp-key.json"
                         sh 'gcloud auth activate-service-account --key-file=gcp-key.json'
                         sh 'gcloud container clusters get-credentials ${GKE_CLUSTER_NAME} --region ${GKE_REGION} --project ${GKE_PROJECT}'

@@ -29,7 +29,6 @@ pipeline {
         stage('Build Backend') {
             steps {
                 dir('backend') {
-                    // 모든 캐시를 지우고 다시 빌드
                     sh './gradlew clean build'
                 }
             }
@@ -38,8 +37,6 @@ pipeline {
         stage('Build & Push Backend Docker Image') {
             steps {
                 dir('backend') {
-                    // Dockerfile 내용을 Jenkinsfile에 직접 작성하여 파이프합니다.
-                    // 이렇게 하면 Dockerfile 파일 자체의 줄 끝, BOM 문제 등을 완전히 해결할 수 있습니다.
                     sh """
                         docker build \\
                           --platform linux/amd64 \\
@@ -70,7 +67,6 @@ EOF
         stage('Build & Push Frontend Docker Image') {
             steps {
                 dir('frontend') {
-                    sh 'dos2unix ../docker-entrypoint.sh'
                     sh """
                 docker build \\
                   --platform linux/amd64 \\
@@ -83,7 +79,6 @@ COPY . .
 RUN npm install && npm run build
 FROM --platform=linux/amd64 nginx:alpine
 COPY --from=builder /app/build /usr/share/nginx/html
-COPY ../docker-entrypoint.sh /docker-entrypoint.sh
 EXPOSE 80
 CMD ["nginx", "-g", "daemon off;"]
 EOF

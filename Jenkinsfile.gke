@@ -68,11 +68,11 @@ EOF
             steps {
                 dir('frontend') {
                     sh """
-docker build \\
-  --platform linux/amd64 \\
-  -t ${FRONTEND_IMAGE_NAME} \\
-  -t ${FRONTEND_IMAGE_LATEST_NAME} \\
-  -f - . <<EOF
+                docker build \\
+                  --platform linux/amd64 \\
+                  -t ${FRONTEND_IMAGE_NAME} \\
+                  -t ${FRONTEND_IMAGE_LATEST_NAME} \\
+                  -f - . <<EOF
 FROM --platform=linux/amd64 node:18-alpine AS builder
 WORKDIR /app
 COPY . .
@@ -82,7 +82,7 @@ COPY --from=builder /app/build /usr/share/nginx/html
 EXPOSE 80
 CMD ["nginx", "-g", "daemon off;"]
 EOF
-"""
+            """
                 }
             }
         }

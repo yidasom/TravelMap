@@ -1,17 +1,20 @@
-FROM node:18-alpine AS builder
+FROM --platform=linux/amd64 node:18-alpine AS builder
 WORKDIR /app
 COPY . .
 RUN npm install && npm run build
 
-# nginx entrypoint 추출
-FROM nginx:alpine AS nginx_stage
+FROM --platform=linux/amd64 alpine AS dos2unix-stage
+RUN apk update && apk add dos2unix
 
-FROM nginx:alpine
-COPY --from=nginx_stage /docker-entrypoint.sh /docker-entrypoint.sh
-RUN chmod +x /docker-entrypoint.sh
+WORKDIR /app
+COPY ../docker-entrypoint.sh .
+RUN dos2unix docker-entrypoint.sh
+
+FROM --platform=linux/amd64 nginx:alpine
+
+COPY --from=dos2unix-stage /app/docker-entrypoint.sh /docker-entrypoint.sh
 
 COPY --from=builder /app/build /usr/share/nginx/html
 
 EXPOSE 80
-ENTRYPOINT ["/docker-entrypoint.sh"]
 CMD ["nginx", "-g", "daemon off;"]

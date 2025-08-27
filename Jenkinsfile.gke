@@ -135,8 +135,8 @@ EOF
                     sh "kubectl rollout status deployment/travelmap-frontend-deployment"
 
                     // 서비스 적용
-                    sh "kubectl apply -f ./k8s/gke-backend-service.yaml"
-                    sh "kubectl apply -f ./k8s/gke-frontend-service.yaml"
+                    sh "kubectl apply -f ./k8s/service.yaml"
+                    sh "kubectl apply -f ./k8s/gke-service.yaml"
                 }
             }
         }

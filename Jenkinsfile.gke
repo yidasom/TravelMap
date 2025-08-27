@@ -96,7 +96,7 @@ EOF
                 }
 
                 // 경로를 Jenkinsfile 기준으로 수정
-                sh 'kubectl apply -f ./k8s/secret.yaml'
+                sh 'kubectl apply -f /home/jenkins/k8s/secret.yaml'
                 sh 'kubectl apply -f ./k8s/db/gke-postgres-pvc.yaml'
                 sh 'kubectl apply -f ./k8s/db/postgres-deployment.yaml'
 

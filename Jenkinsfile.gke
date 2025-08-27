@@ -68,17 +68,18 @@ EOF
             steps {
                 dir('frontend') {
                     sh """
-                docker build \\
-                  --platform linux/amd64 \\
-                  --no-cache \\
-                  --pull \\
-                  -t ${FRONTEND_IMAGE_NAME} \\
-                  -t ${FRONTEND_IMAGE_LATEST_NAME} \\
-                  -f - . <<EOF
+                        docker build \\
+                          --platform linux/amd64 \\
+                          --no-cache \\
+                          --pull \\
+                          -t ${FRONTEND_IMAGE_NAME} \\
+                          -t ${FRONTEND_IMAGE_LATEST_NAME} \\
+                          -f - . <<EOF
 FROM --platform=linux/amd64 node:18-alpine AS builder
 WORKDIR /app
 COPY . .
-RUN npm install && npm run build
+RUN ["npm", "install"]
+RUN ["npm", "run", "build"]
 FROM --platform=linux/amd64 nginx:alpine
 COPY --from=builder /app/build /usr/share/nginx/html
 EXPOSE 80

@@ -70,8 +70,7 @@ EOF
         stage('Build & Push Frontend Docker Image') {
             steps {
                 dir('frontend') {
-                    // docker-entrypoint.sh의 줄바꿈 형식을 dos2unix로 변환
-                    sh 'dos2unix docker-entrypoint.sh'
+                    sh 'dos2unix ../docker-entrypoint.sh'
                     sh """
                 docker build \\
                   --platform linux/amd64 \\
@@ -84,7 +83,7 @@ COPY . .
 RUN npm install && npm run build
 FROM --platform=linux/amd64 nginx:alpine
 COPY --from=builder /app/build /usr/share/nginx/html
-COPY docker-entrypoint.sh /docker-entrypoint.sh
+COPY ../docker-entrypoint.sh /docker-entrypoint.sh
 EXPOSE 80
 CMD ["nginx", "-g", "daemon off;"]
 EOF

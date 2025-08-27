@@ -1,6 +1,7 @@
 FROM --platform=linux/amd64 node:18-alpine AS builder
 WORKDIR /app
 COPY . .
+RUN apk add --no-cache dos2unix
 RUN npm install && npm run build
 
 FROM --platform=linux/amd64 alpine AS dos2unix-stage

@@ -90,34 +90,36 @@ EOF
             steps {
                 script {
                     withCredentials([file(credentialsId: 'gke-credentials', variable: 'GCP_SERVICE_KEY_FILE')]) {
-                        sh 'gcloud auth activate-service-account --key-file=${GCP_SERVICE_KEY_FILE}'
-                        sh 'gcloud container clusters get-credentials ${GKE_CLUSTER_NAME} --region ${GKE_REGION} --project ${GKE_PROJECT}'
+                        sh "gcloud auth activate-service-account --key-file=${GCP_SERVICE_KEY_FILE}"
+                        sh "gcloud container clusters get-credentials ${GKE_CLUSTER_NAME} --region ${GKE_REGION} --project ${GKE_PROJECT}"
                     }
+
+                    // 경로를 Jenkinsfile 기준으로 수정
+                    sh 'kubectl apply -f /home/jenkins/k8s/secret.yaml'
+                    sh "kubectl apply -f ./k8s/db/gke-postgres-pvc.yaml"
+                    sh "kubectl apply -f ./k8s/db/postgres-deployment.yaml"
+
+                    // PostgreSQL 배포 완료 대기
+                    sh "kubectl rollout status deployment/postgres"
+
+                    // 리눅스 sed 문법으로 수정
+                    sh """
+                        sed -i "s|travelmap-backend:latest|travelmap-backend:${BACKEND_IMAGE_TAG}|g" ./k8s/deployment.yaml
+                        sed -i "s|travelmap-frontend:latest|travelmap-frontend:${FRONTEND_IMAGE_TAG}|g" ./k8s/frontend-deployment.yaml
+                    """
+
+                    // 배포
+                    sh "kubectl apply -f ./k8s/deployment.yaml"
+                    sh "kubectl apply -f ./k8s/frontend-deployment.yaml"
+
+                    // 롤아웃 완료 대기
+                    sh "kubectl rollout status deployment/travelmap-deployment"
+                    sh "kubectl rollout status deployment/travelmap-frontend-deployment"
+
+                    // 서비스 적용
+                    sh "kubectl apply -f ./k8s/gke-backend-service.yaml"
+                    sh "kubectl apply -f ./k8s/gke-frontend-service.yaml"
                 }
-
-                // 경로를 Jenkinsfile 기준으로 수정
-                sh 'kubectl apply -f /home/jenkins/k8s/secret.yaml'
-                sh 'kubectl apply -f ./k8s/db/gke-postgres-pvc.yaml'
-                sh 'kubectl apply -f ./k8s/db/postgres-deployment.yaml'
-
-                // PostgreSQL 배포가 완료될 때까지 대기
-                sh 'kubectl rollout status deployment/postgres'
-
-                sh 'export BACKEND_TAG="${BACKEND_IMAGE_TAG}"'
-                sh 'sed -i '' "s|travelmap-backend:latest|travelmap-backend:${BACKEND_TAG}|g" k8s/deployment.yaml'
-
-                sh 'export FRONTEND_TAG="${FRONTEND_IMAGE_TAG}"'
-                sh 'sed -i '' "s|travelmap-frontend:latest|travelmap-frontend:${FRONTEND_TAG}|g" k8s/frontend-deployment.yaml'
-
-                sh 'kubectl apply -f k8s/deployment.yaml'
-                sh 'kubectl apply -f k8s/frontend-deployment.yaml'
-
-                // 모든 Deployment가 완료될 때까지 대기
-                sh 'kubectl rollout status deployment/travelmap-deployment'
-                sh 'kubectl rollout status deployment/travelmap-frontend-deployment'
-
-                sh 'kubectl apply -f k8s/gke-backend-service.yaml'
-                sh 'kubectl apply -f k8s/gke-frontend-service.yaml'
             }
         }
     }

@@ -20,3 +20,5 @@ spec:
           image: somlh1212/travelmap-frontend:latest
           ports:
             - containerPort: 80 # Nginx는 기본적으로 80 포트를 사용합니다.
+      imagePullSecrets:
+        - name: regcred

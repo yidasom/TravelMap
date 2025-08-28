@@ -83,16 +83,27 @@ EOF
             steps {
                 dir('frontend') {
                     sh """
-                        docker buildx create --use --name multiarch-builder || true
-                        docker buildx use multiarch-builder
-                        docker buildx inspect --bootstrap
+                docker build \\
+                  --platform linux/amd64 \\
+                  -t ${FRONTEND_IMAGE_NAME} \\
+                  -t ${FRONTEND_IMAGE_LATEST_NAME} \\
+                  -f - . <<EOF
+FROM --platform=linux/amd64 node:18-alpine AS build
+WORKDIR /app
+COPY package.json ./
+COPY package-lock.json ./
+RUN npm install
+COPY . ./
+RUN npm run build
 
-                        docker buildx build \\
-                          --platform linux/arm64 \\
-                          -t ${FRONTEND_IMAGE_NAME} \\
-                          -t ${FRONTEND_IMAGE_LATEST_NAME} \\
-                          --push .
-                    """
+FROM --platform=linux/amd64 nginx:1.21-alpine
+COPY --from=build /app/build /usr/share/nginx/html
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]
+EOF
+                docker push ${FRONTEND_IMAGE_NAME}
+                docker push ${FRONTEND_IMAGE_LATEST_NAME}
+            """
                 }
             }
         }

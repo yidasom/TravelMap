@@ -50,21 +50,16 @@ pipeline {
             steps {
                 dir('backend') {
                     sh """
-                        docker build \\
-                          --platform linux/amd64 \\
-                          -t ${BACKEND_IMAGE_NAME} \\
-                          -t ${BACKEND_IMAGE_LATEST_NAME} \\
-                          -f - . <<EOF
-FROM --platform=linux/amd64 openjdk:21-slim-buster
-WORKDIR /app
-COPY build/libs/*.jar app.jar
-EXPOSE 8080
-CMD ["java", "-jar", "app.jar"]
-EOF
+                docker buildx create --use --name multiarch-builder || true
+                docker buildx use multiarch-builder
+                docker buildx inspect --bootstrap
 
-                docker push ${BACKEND_IMAGE_NAME}
-                docker push ${BACKEND_IMAGE_LATEST_NAME}
-                    """
+                docker buildx build \\
+                  --platform linux/amd64 \\
+                  -t ${BACKEND_IMAGE_NAME} \\
+                  -t ${BACKEND_IMAGE_LATEST_NAME} \\
+                  --push .
+            """
                 }
             }
         }

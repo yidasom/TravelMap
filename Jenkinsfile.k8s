@@ -27,22 +27,33 @@ pipeline {
             }
         }
 
-        stage('Build Backend Docker Image') {
+        stage('Build & Push Backend Docker Image') {
             steps {
                 dir('backend') {
                     // 백엔드 이미지를 빌드하고 태그를 지정합니다.
-                    sh "docker build -t ${BACKEND_IMAGE_NAME} -t ${BACKEND_IMAGE_LATEST_NAME} ."
+//                    sh "docker build -t ${BACKEND_IMAGE_NAME} -t ${BACKEND_IMAGE_LATEST_NAME} ."
+                    sh """
+                docker buildx create --use --name multiarch-builder || true
+                docker buildx use multiarch-builder
+                docker buildx inspect --bootstrap
+
+                docker buildx build \\
+                  --platform linux/amd64 \\
+                  -t ${BACKEND_IMAGE_NAME} \\
+                  -t ${BACKEND_IMAGE_LATEST_NAME} \\
+                  --push .
+            """
                 }
             }
         }
 
-        stage('Push Backend Docker Image') {
-            steps {
-                // 백엔드 이미지를 Docker Hub에 푸시합니다.
-                sh "docker push ${BACKEND_IMAGE_NAME}"
-                sh "docker push ${BACKEND_IMAGE_LATEST_NAME}"
-            }
-        }
+//        stage('Push Backend Docker Image') {
+//            steps {
+//                // 백엔드 이미지를 Docker Hub에 푸시합니다.
+//                sh "docker push ${BACKEND_IMAGE_NAME}"
+//                sh "docker push ${BACKEND_IMAGE_LATEST_NAME}"
+//            }
+//        }
 
         stage('Build Frontend') {
             steps {
@@ -54,22 +65,33 @@ pipeline {
             }
         }
 
-        stage('Build Frontend Docker Image') {
+        stage('Build & Push Frontend Docker Image') {
             steps {
                 dir('frontend') {
                     // 프론트엔드 이미지를 빌드하고 태그를 지정합니다.
-                    sh "docker build -t ${FRONTEND_IMAGE_NAME} -t ${FRONTEND_IMAGE_LATEST_NAME} ."
+//                    sh "docker build -t ${FRONTEND_IMAGE_NAME} -t ${FRONTEND_IMAGE_LATEST_NAME} ."
+                    sh """
+                docker buildx create --use --name multiarch-builder || true
+                docker buildx use multiarch-builder
+                docker buildx inspect --bootstrap
+
+                docker buildx build \\
+                  --platform linux/amd64 \\
+                  -t ${FRONTEND_IMAGE_NAME} \\
+                  -t ${FRONTEND_IMAGE_LATEST_NAME} \\
+                  --push .
+            """
                 }
             }
         }
 
-        stage('Push Frontend Docker Image') {
-            steps {
-                // 프론트엔드 이미지를 Docker Hub에 푸시합니다.
-                sh "docker push ${FRONTEND_IMAGE_NAME}"
-                sh "docker push ${FRONTEND_IMAGE_LATEST_NAME}"
-            }
-        }
+//        stage('Push Frontend Docker Image') {
+//            steps {
+//                // 프론트엔드 이미지를 Docker Hub에 푸시합니다.
+//                sh "docker push ${FRONTEND_IMAGE_NAME}"
+//                sh "docker push ${FRONTEND_IMAGE_LATEST_NAME}"
+//            }
+//        }
 
         stage('Deploy to K8s') {
             steps {

@@ -42,7 +42,7 @@ spec:
       volumes:
         - name: postgres-data
           persistentVolumeClaim:
-            claimName: k8s-postgres-pvc # PVC 이름만 참조하도록 변경
+            claimName: postgres-pvc # PVC 이름만 참조하도록 변경
 ---
 apiVersion: v1
 kind: Service

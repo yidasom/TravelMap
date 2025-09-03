@@ -47,14 +47,6 @@ pipeline {
             }
         }
 
-//        stage('Push Backend Docker Image') {
-//            steps {
-//                // 백엔드 이미지를 Docker Hub에 푸시합니다.
-//                sh "docker push ${BACKEND_IMAGE_NAME}"
-//                sh "docker push ${BACKEND_IMAGE_LATEST_NAME}"
-//            }
-//        }
-
         stage('Build Frontend') {
             steps {
                 dir('frontend') {
@@ -85,21 +77,13 @@ pipeline {
             }
         }
 
-//        stage('Push Frontend Docker Image') {
-//            steps {
-//                // 프론트엔드 이미지를 Docker Hub에 푸시합니다.
-//                sh "docker push ${FRONTEND_IMAGE_NAME}"
-//                sh "docker push ${FRONTEND_IMAGE_LATEST_NAME}"
-//            }
-//        }
-
         stage('Deploy to K8s') {
             steps {
                 // Secret, PV, PVC는 한 번만 배포하면 됩니다.
                 sh 'kubectl apply -f /home/jenkins/k8s/secret.yaml'
                 sh 'kubectl apply -f ./k8s/db/k8s-postgres-pv.yaml'
                 sh 'kubectl apply -f ./k8s/db/k8s-postgres-pvc.yaml'
-                sh 'kubectl apply -f ./k8s/db/k8s-postgres-deployment.yaml'
+                sh 'kubectl apply -f ./k8s/db/postgres-deployment.yaml'
 
                 // PostgreSQL 배포가 완료될 때까지 대기
                 sh 'kubectl rollout status deployment/postgres'

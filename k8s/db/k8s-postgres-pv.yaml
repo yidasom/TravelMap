@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: postgres-pv
+spec:
+  capacity:
+    storage: 5Gi    # PVC 요청과 맞춤
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: standard  # PVC와 맞춤
+  hostPath:
+    path: "/data/k8s-postgres"

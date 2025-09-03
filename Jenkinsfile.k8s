@@ -81,7 +81,6 @@ pipeline {
             steps {
                 // Secret, PV, PVC는 한 번만 배포하면 됩니다.
                 sh 'kubectl apply -f /home/jenkins/k8s/secret.yaml'
-                sh 'kubectl apply -f ./k8s/db/k8s-postgres-pv.yaml'
                 sh 'kubectl apply -f ./k8s/db/k8s-postgres-pvc.yaml'
                 sh 'kubectl apply -f ./k8s/db/postgres-deployment.yaml'
 

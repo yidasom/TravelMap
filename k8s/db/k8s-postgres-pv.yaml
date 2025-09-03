@@ -4,9 +4,17 @@ metadata:
   name: k8s-postgres-pv
 spec:
   capacity:
-    storage: 5Gi    # PVC 요청과 맞춤
+    storage: 5Gi
   accessModes:
     - ReadWriteOnce
-  storageClassName: standard  # PVC와 맞춤
+  storageClassName: standard
   hostPath:
     path: "/data/k8s-postgres"
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+                - k8s-travel

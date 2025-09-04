@@ -100,12 +100,12 @@ pipeline {
                         sh "gcloud container clusters get-credentials ${GKE_CLUSTER_NAME} --region ${GKE_REGION} --project ${GKE_PROJECT}"
                     }
 
+                    def context = "gke_cogent-spirit-468810-j1_asia-northeast3_travelmap-cluster"
+
                     // 경로를 Jenkinsfile 기준으로 수정
-                    sh 'kubectl apply -f /home/jenkins/k8s/secret.yaml'
-                    // PVC 충돌 방지를 위해 기존 PVC 삭제 후 새로 생성
-//                    sh 'kubectl delete pvc postgres-pvc --ignore-not-found'
-                    sh "kubectl apply -f ./k8s/db/gke-postgres-pvc.yaml"
-                    sh "kubectl apply -f ./k8s/db/postgres-deployment.yaml"
+                    sh 'kubectl --context=${context} apply -f /home/jenkins/k8s/secret.yaml'
+                    sh "kubectl --context=${context} apply -f ./k8s/db/gke-postgres-pvc.yaml"
+                    sh "kubectl --context=${context} apply -f ./k8s/db/postgres-deployment.yaml"
                     sh 'kubectl set env deployment/postgres POSTGRES_PVC_NAME=gke-postgres-pvc'
 
 
@@ -115,14 +115,14 @@ pipeline {
                     sh "sed -i 's|travelmap-backend:latest|travelmap-backend:${BACKEND_IMAGE_TAG}|g' ./k8s/deployment.yaml"
                     sh "sed -i 's|travelmap-frontend:latest|travelmap-frontend:${FRONTEND_IMAGE_TAG}|g' ./k8s/frontend-deployment.yaml"
 
-                    sh 'kubectl apply -f ./k8s/deployment.yaml'
-                    sh 'kubectl apply -f ./k8s/frontend-deployment.yaml'
+                    sh 'kubectl --context=${context} apply -f ./k8s/deployment.yaml'
+                    sh 'kubectl --context=${context} apply -f ./k8s/frontend-deployment.yaml'
 
                     sh 'kubectl rollout status deployment/travelmap-deployment'
                     sh 'kubectl rollout status deployment/travelmap-frontend-deployment'
 
-                    sh 'kubectl apply -f ./k8s/service.yaml'
-                    sh 'kubectl apply -f ./k8s/gke-service.yaml'
+                    sh 'kubectl --context=${context} apply -f ./k8s/service.yaml'
+                    sh 'kubectl --context=${context} apply -f ./k8s/gke-service.yaml'
                 }
             }
         }

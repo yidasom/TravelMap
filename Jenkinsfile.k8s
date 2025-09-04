@@ -83,7 +83,7 @@ pipeline {
                 sh 'kubectl apply -f /home/jenkins/k8s/secret.yaml'
                 // PVC 충돌 방지를 위해 기존 PVC 삭제 후 새로 생성, pvc 삭제 완료 될 때까지 대기
                 sh '''
-                  while kubectl get pvc gke-postgres-pvc &>/dev/null; do
+                  while kubectl get pvc postgres-pvc &>/dev/null; do
                     echo "PVC 삭제 대기 중..."
                     sleep 5
                   done

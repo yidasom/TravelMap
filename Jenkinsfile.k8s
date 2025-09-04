@@ -75,33 +75,35 @@ pipeline {
 
         stage('Deploy to K8s') {
             steps {
-                def context = "kubernetes-admin@kubernetes"
-                // Secret 먼저 적용
-                sh 'kubectl --context=${context} apply -f /home/jenkins/k8s/secret.yaml'
+                script {
+                    def context = "kubernetes-admin@kubernetes"
+                    // Secret 먼저 적용
+                    sh 'kubectl --context=${context} apply -f /home/jenkins/k8s/secret.yaml'
 
-                // PV/PVC/Deployment 적용
-                sh 'kubectl --context=${context} apply -f ./k8s/db/k8s-postgres-pv.yaml'
-                sh 'kubectl --context=${context} apply -f ./k8s/db/k8s-postgres-pvc.yaml'
-                sh 'kubectl set env deployment/postgres POSTGRES_PVC_NAME=postgres-pvc'
-                sh 'kubectl --context=${context} apply -f ./k8s/db/postgres-deployment.yaml'
+                    // PV/PVC/Deployment 적용
+                    sh 'kubectl --context=${context} apply -f ./k8s/db/k8s-postgres-pv.yaml'
+                    sh 'kubectl --context=${context} apply -f ./k8s/db/k8s-postgres-pvc.yaml'
+                    sh 'kubectl set env deployment/postgres POSTGRES_PVC_NAME=postgres-pvc'
+                    sh 'kubectl --context=${context} apply -f ./k8s/db/postgres-deployment.yaml'
 
-                // PostgreSQL 배포가 완료될 때까지 대기
-                sh 'kubectl rollout status deployment/postgres'
+                    // PostgreSQL 배포가 완료될 때까지 대기
+                    sh 'kubectl rollout status deployment/postgres'
 
-                // Deployment 이미지 업데이트
-                sh "sed -i 's|travelmap-backend:latest|travelmap-backend:${BACKEND_IMAGE_TAG}|g' ./k8s/deployment.yaml"
-                sh "sed -i 's|travelmap-frontend:latest|travelmap-frontend:${FRONTEND_IMAGE_TAG}|g' ./k8s/frontend-deployment.yaml"
+                    // Deployment 이미지 업데이트
+                    sh "sed -i 's|travelmap-backend:latest|travelmap-backend:${BACKEND_IMAGE_TAG}|g' ./k8s/deployment.yaml"
+                    sh "sed -i 's|travelmap-frontend:latest|travelmap-frontend:${FRONTEND_IMAGE_TAG}|g' ./k8s/frontend-deployment.yaml"
 
-                sh 'kubectl --context=${context} apply -f ./k8s/deployment.yaml'
-                sh 'kubectl --context=${context} apply -f ./k8s/frontend-deployment.yaml'
+                    sh 'kubectl --context=${context} apply -f ./k8s/deployment.yaml'
+                    sh 'kubectl --context=${context} apply -f ./k8s/frontend-deployment.yaml'
 
-                // 모든 Deployment가 완료될 때까지 대기
-                sh 'kubectl rollout status deployment/travelmap-deployment'
-                sh 'kubectl rollout status deployment/travelmap-frontend-deployment'
+                    // 모든 Deployment가 완료될 때까지 대기
+                    sh 'kubectl rollout status deployment/travelmap-deployment'
+                    sh 'kubectl rollout status deployment/travelmap-frontend-deployment'
 
-                // 백엔드와 프론트엔드 Service를 배포
-                sh 'kubectl --context=${context} apply -f ./k8s/service.yaml'
-                sh 'kubectl --context=${context} apply -f ./k8s/frontend-service.yaml'
+                    // 백엔드와 프론트엔드 Service를 배포
+                    sh 'kubectl --context=${context} apply -f ./k8s/service.yaml'
+                    sh 'kubectl --context=${context} apply -f ./k8s/frontend-service.yaml'
+                }
             }
         }
     }

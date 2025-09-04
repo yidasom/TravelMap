@@ -102,6 +102,8 @@ pipeline {
 
                     // 경로를 Jenkinsfile 기준으로 수정
                     sh 'kubectl apply -f /home/jenkins/k8s/secret.yaml'
+                    // PVC 충돌 방지를 위해 기존 PVC 삭제 후 새로 생성
+                    sh 'kubectl delete pvc postgres-pvc --ignore-not-found'
                     sh "kubectl apply -f ./k8s/db/gke-postgres-pvc.yaml"
                     sh "kubectl apply -f ./k8s/db/postgres-deployment.yaml"
 

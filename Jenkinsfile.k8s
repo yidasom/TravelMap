@@ -81,6 +81,14 @@ pipeline {
             steps {
                 // Secret, PV, PVC는 한 번만 배포하면 됩니다.
                 sh 'kubectl apply -f /home/jenkins/k8s/secret.yaml'
+                // PVC 충돌 방지를 위해 기존 PVC 삭제 후 새로 생성, pvc 삭제 완료 될 때까지 대기
+                sh '''
+                  while kubectl get pvc gke-postgres-pvc &>/dev/null; do
+                    echo "PVC 삭제 대기 중..."
+                    sleep 5
+                  done
+                '''
+                sh 'kubectl apply -f ./k8s/db/k8s-postgres-pv.yaml'
                 sh 'kubectl apply -f ./k8s/db/k8s-postgres-pvc.yaml'
                 sh 'kubectl apply -f ./k8s/db/postgres-deployment.yaml'
 

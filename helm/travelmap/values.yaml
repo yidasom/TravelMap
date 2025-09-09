@@ -6,6 +6,7 @@ backend:
     tag: latest
     pullPolicy: Always
   service:
+    type: ClusterIP # 내부용
     port: 8080
   env:
     SPRING_PROFILES_ACTIVE: prod
@@ -17,6 +18,7 @@ frontend:
     tag: latest
     pullPolicy: IfNotPresent
   service:
+    type: LoadBalancer  # 외부용
     port: 80
   resources: {}
 

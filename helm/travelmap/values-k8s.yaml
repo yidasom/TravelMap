@@ -1,4 +1,4 @@
 db:
-  type: gke
-#  host: <GKE-CloudSQL-IP>  # 실제 GKE DB IP 또는 서비스 이름
+  type: k8s
+  host: postgres
   port: 5432

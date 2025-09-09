@@ -82,7 +82,7 @@ pipeline {
                     sh "kubectl --context=${context} apply -f /home/jenkins/k8s/secret.yaml"
 
                     // Helm 배포
-                    withCredentials([file(credentialsId: 'kubeconfig-k8s', variable: 'KUBECONFIG')]) {
+//                    withCredentials([file(credentialsId: 'kubeconfig-k8s', variable: 'KUBECONFIG')]) {
                         sh """
                                 helm upgrade --install travelmap ./helm/travelmap \
                                   --namespace travelmap --create-namespace \
@@ -93,7 +93,7 @@ pipeline {
 
                         // 배포 완료 대기
                         sh "kubectl --context=${context} rollout status deployment/travelmap"
-                    }
+//                    }
                 }
             }
         }

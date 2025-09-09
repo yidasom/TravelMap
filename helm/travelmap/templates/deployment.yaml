@@ -33,72 +33,53 @@ spec:
                     name: {{ .Values.db.password.secretName }}
                     key: {{ .Values.db.password.secretKey }}
             livenessProbe:
-            httpGet:
-              path: /
-              port: http
-          readinessProbe:
-            httpGet:
-              path: /
-              port: http
-          resources:
-            {{- toYaml .Values.backend.resources | nindent 12 }}
+              httpGet:
+                path: /
+                port: {{ .Values.backend.service.port }}
+            readinessProbe:
+              httpGet:
+                path: /
+                port: {{ .Values.backend.service.port }}
+            resources:
+              {{- toYaml .Values.backend.resources | nindent 12 }}
 
 ---
-# =======================
-# Frontend Deployment
-# =======================
+
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ include "travelmap.fullname" . }}-frontend
   labels:
     {{- include "travelmap.labels" . | nindent 4 }}
-    app.kubernetes.io/component: frontend
 spec:
-  {{- if not .Values.autoscaling.enabled }}
   replicas: {{ .Values.frontend.replicaCount | default .Values.replicaCount }}
-  {{- end }}
   selector:
     matchLabels:
-      {{- include "travelmap.selectorLabels" . | nindent 6 }}
-      app.kubernetes.io/component: frontend
+      app: {{ include "travelmap.fullname" . }}-frontend
   template:
     metadata:
-      {{- with .Values.podAnnotations }}
-      annotations:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
       labels:
-        {{- include "travelmap.labels" . | nindent 8 }}
-        app.kubernetes.io/component: frontend
-        {{- with .Values.podLabels }}
+        app: {{ include "travelmap.fullname" . }}-frontend
+      annotations:
+        {{- with .Values.podAnnotations }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
     spec:
-      {{- with .Values.imagePullSecrets }}
-      imagePullSecrets:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-      serviceAccountName: {{ include "travelmap.serviceAccountName" . }}
-      securityContext:
-        {{- toYaml .Values.podSecurityContext | nindent 8 }}
       containers:
         - name: frontend
-          securityContext:
-            {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.frontend.image.repository }}:{{ .Values.frontend.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.frontend.image.pullPolicy }}
           ports:
-            - name: http
-              containerPort: {{ .Values.frontend.service.port }}
+            - containerPort: {{ .Values.frontend.service.port }}
+              name: http
               protocol: TCP
           livenessProbe:
             httpGet:
               path: /
-              port: http
+              port: {{ .Values.frontend.service.port }}
           readinessProbe:
             httpGet:
               path: /
-              port: http
+              port: {{ .Values.frontend.service.port }}
           resources:
             {{- toYaml .Values.frontend.resources | nindent 12 }}

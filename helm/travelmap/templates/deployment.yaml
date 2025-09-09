@@ -4,63 +4,35 @@ metadata:
   name: {{ include "travelmap.fullname" . }}-backend
   labels:
     {{- include "travelmap.labels" . | nindent 4 }}
-    app.kubernetes.io/component: backend
 spec:
-  {{- if not .Values.autoscaling.enabled }}
-  replicas: {{ .Values.backend.replicaCount | default .Values.replicaCount }}
-  {{- end }}
+  replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-      {{- include "travelmap.selectorLabels" . | nindent 6 }}
-      app.kubernetes.io/component: backend
+      app: {{ include "travelmap.fullname" . }}-backend
   template:
     metadata:
-      {{- with .Values.podAnnotations }}
-      annotations:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
       labels:
-        {{- include "travelmap.labels" . | nindent 8 }}
-        app.kubernetes.io/component: backend
-        {{- with .Values.podLabels }}
-        {{- toYaml . | nindent 8 }}
-        {{- end }}
+        app: {{ include "travelmap.fullname" . }}-backend
     spec:
-      {{- with .Values.imagePullSecrets }}
-      imagePullSecrets:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-      serviceAccountName: {{ include "travelmap.serviceAccountName" . }}
-      securityContext:
-        {{- toYaml .Values.podSecurityContext | nindent 8 }}
       containers:
-        - name: backend
-          securityContext:
-            {{- toYaml .Values.securityContext | nindent 12 }}
-          image: "{{ .Values.backend.image.repository }}:{{ .Values.backend.image.tag | default .Chart.AppVersion }}"
-          imagePullPolicy: {{ .Values.backend.image.pullPolicy }}
-          ports:
-            - name: http
-              containerPort: {{ .Values.backend.service.port }}
-              protocol: TCP
-          env:
-            - name: SPRING_PROFILES_ACTIVE
-              value: {{ .Values.backend.env.SPRING_PROFILES_ACTIVE | quote }}
-            - name: SPRING_DATASOURCE_URL
-              value: {{ .Values.backend.env.SPRING_DATASOURCE_URL | quote }}
-            - name: SPRING_DATASOURCE_USERNAME
-              value: {{ .Values.backend.env.SPRING_DATASOURCE_USERNAME | quote }}
-            - name: SPRING_DATASOURCE_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Values.backend.env.SPRING_DATASOURCE_PASSWORD.secretName }}
-                  key: {{ .Values.backend.env.SPRING_DATASOURCE_PASSWORD.secretKey }}
-            - name: YOUTUBE_API_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Values.backend.env.YOUTUBE_API_KEY.secretName }}
-                  key: {{ .Values.backend.env.YOUTUBE_API_KEY.secretKey }}
-          livenessProbe:
+          - name: backend
+            image: "{{ .Values.backend.image.repository }}:{{ .Values.backend.image.tag }}"
+            imagePullPolicy: {{ .Values.backend.image.pullPolicy }}
+            ports:
+              - containerPort: {{ .Values.backend.service.port }}
+            env:
+              - name: SPRING_PROFILES_ACTIVE
+                value: {{ .Values.backend.env.SPRING_PROFILES_ACTIVE }}
+              - name: SPRING_DATASOURCE_URL
+                value: jdbc:postgresql://{{ .Values.db.host }}:{{ .Values.db.port }}/travelmap
+              - name: SPRING_DATASOURCE_USERNAME
+                value: {{ .Values.db.username }}
+              - name: SPRING_DATASOURCE_PASSWORD
+                valueFrom:
+                  secretKeyRef:
+                    name: {{ .Values.db.password.secretName }}
+                    key: {{ .Values.db.password.secretKey }}
+            livenessProbe:
             httpGet:
               path: /
               port: http

@@ -39,10 +39,13 @@ spec:
             limits:
               cpu: "500m"
               memory: "512Mi"
+
+      {{- if eq .Values.db.type "k8s" }}
       volumes:
         - name: postgres-data
           persistentVolumeClaim:
             claimName: postgres-pvc
+      {{- end }}
 ---
 apiVersion: v1
 kind: Service

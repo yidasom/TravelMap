@@ -99,30 +99,43 @@ pipeline {
                         sh "gcloud auth activate-service-account --key-file=${GCP_SERVICE_KEY_FILE}"
                         sh "gcloud container clusters get-credentials ${GKE_CLUSTER_NAME} --region ${GKE_REGION} --project ${GKE_PROJECT}"
                     }
-
                     def context = "gke_cogent-spirit-468810-j1_asia-northeast3_travelmap-cluster"
-
-                    // 경로를 Jenkinsfile 기준으로 수정
                     sh "kubectl --context=${context} apply -f /home/jenkins/k8s/secret.yaml"
-                    sh "kubectl --context=${context} apply -f ./k8s/db/gke-postgres-pvc.yaml"
-                    sh "kubectl --context=${context} apply -f ./k8s/db/postgres-deployment.yaml"
-                    sh "kubectl set env deployment/postgres POSTGRES_PVC_NAME=gke-postgres-pvc"
 
+                    // Helm 배포
+                    sh """
+                            helm upgrade --install travelmap ./helm/travelmap \\
+                              --namespace travelmap --create-namespace \\
+                              -f ./helm/travelmap/values-gke.yaml \\
+                              --set image.backend.tag=${BACKEND_IMAGE_TAG} \\
+                              --set image.frontend.tag=${FRONTEND_IMAGE_TAG}
+                        """
 
-                    // PostgreSQL 배포 완료 대기
-                    sh "kubectl rollout status deployment/postgres"
+                    sh "kubectl --context=${context} rollout status deployment/travelmap"
 
-                    sh "sed -i 's|travelmap-backend:latest|travelmap-backend:${BACKEND_IMAGE_TAG}|g' ./k8s/deployment.yaml"
-                    sh "sed -i 's|travelmap-frontend:latest|travelmap-frontend:${FRONTEND_IMAGE_TAG}|g' ./k8s/frontend-deployment.yaml"
-
-                    sh "kubectl --context=${context} apply -f ./k8s/deployment.yaml"
-                    sh "kubectl --context=${context} apply -f ./k8s/frontend-deployment.yaml"
-
-                    sh "kubectl rollout status deployment/travelmap-deployment"
-                    sh "kubectl rollout status deployment/travelmap-frontend-deployment"
-
-                    sh "kubectl --context=${context} apply -f ./k8s/service.yaml"
-                    sh "kubectl --context=${context} apply -f ./k8s/gke-service.yaml"
+//                    def context = "gke_cogent-spirit-468810-j1_asia-northeast3_travelmap-cluster"
+//
+//                    // 경로를 Jenkinsfile 기준으로 수정
+//                    sh "kubectl --context=${context} apply -f /home/jenkins/k8s/secret.yaml"
+//                    sh "kubectl --context=${context} apply -f ./k8s/db/gke-postgres-pvc.yaml"
+//                    sh "kubectl --context=${context} apply -f ./k8s/db/postgres-deployment.yaml"
+////                    sh "kubectl set env deployment/postgres POSTGRES_PVC_NAME=gke-postgres-pvc"
+//
+//
+//                    // PostgreSQL 배포 완료 대기
+//                    sh "kubectl --context=${context} rollout status deployment/postgres"
+//
+//                    sh "sed -i 's|travelmap-backend:latest|travelmap-backend:${BACKEND_IMAGE_TAG}|g' ./k8s/deployment.yaml"
+//                    sh "sed -i 's|travelmap-frontend:latest|travelmap-frontend:${FRONTEND_IMAGE_TAG}|g' ./k8s/frontend-deployment.yaml"
+//
+//                    sh "kubectl --context=${context} apply -f ./k8s/deployment.yaml"
+//                    sh "kubectl --context=${context} apply -f ./k8s/frontend-deployment.yaml"
+//
+//                    sh "kubectl rollout status deployment/travelmap-deployment"
+//                    sh "kubectl rollout status deployment/travelmap-frontend-deployment"
+//
+//                    sh "kubectl --context=${context} apply -f ./k8s/service.yaml"
+//                    sh "kubectl --context=${context} apply -f ./k8s/gke-service.yaml"
                 }
             }
         }

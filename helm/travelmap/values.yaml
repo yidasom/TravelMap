@@ -9,14 +9,6 @@ backend:
     port: 8080
   env:
     SPRING_PROFILES_ACTIVE: prod
-    SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/travelmap
-    SPRING_DATASOURCE_USERNAME: travelmap
-    SPRING_DATASOURCE_PASSWORD:
-      secretName: travelmap-secret
-      secretKey: db-password
-    YOUTUBE_API_KEY:
-      secretName: travelmap-secret
-      secretKey: youtube-api-key
   resources: {}
 
 frontend:
@@ -27,3 +19,12 @@ frontend:
   service:
     port: 80
   resources: {}
+
+db:
+  type: k8s # k8s / gke
+  host: postgres
+  port: 5432
+  username: travelmap
+  password:
+    secretName: travelmap-secret
+    secretKey: db-password

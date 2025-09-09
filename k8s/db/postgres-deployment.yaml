@@ -42,7 +42,7 @@ spec:
       volumes:
         - name: postgres-data
           persistentVolumeClaim:
-            claimName: ${POSTGRES_PVC_NAME}
+            claimName: postgres-pvc
 ---
 apiVersion: v1
 kind: Service

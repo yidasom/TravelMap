@@ -1,9 +1,10 @@
-# templates/service.yaml
+{{ $fullName := include "travelmap.fullname" . }}
 
+---
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "travelmap.fullname" . }}-backend
+  name: {{ $fullName }}-backend
   labels:
     {{- include "travelmap.labels" . | nindent 4 }}
 spec:
@@ -19,7 +20,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "travelmap.fullname" . }}-frontend
+  name: {{ $fullName }}-frontend
   labels:
     {{- include "travelmap.labels" . | nindent 4 }}
 spec:

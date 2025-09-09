@@ -87,8 +87,8 @@ pipeline {
                                 helm upgrade --install travelmap ./helm/travelmap \
                                   --namespace travelmap --create-namespace \
                                   -f ./helm/travelmap/values-k8s.yaml \
-                                  --set image.backend.tag=${BACKEND_IMAGE_TAG} \
-                                  --set image.frontend.tag=${FRONTEND_IMAGE_TAG}
+                                  --set backend.image.tag=${BACKEND_IMAGE_TAG} \
+                                  --set frontend.image.tag=${FRONTEND_IMAGE_TAG}
                             """
 
                         // 배포 완료 대기

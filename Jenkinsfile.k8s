@@ -83,9 +83,12 @@ pipeline {
                     // PV/PVC/Deployment 적용
                     sh "kubectl --context=${context} apply -f ./k8s/db/k8s-postgres-pv.yaml"
                     sh "kubectl --context=${context} apply -f ./k8s/db/k8s-postgres-pvc.yaml"
-                    sh "kubectl set env deployment/postgres POSTGRES_PVC_NAME=postgres-pvc"
-                    sh "kubectl --context=${context} apply -f ./k8s/db/postgres-deployment.yaml"
+//                    sh "kubectl set env deployment/postgres POSTGRES_PVC_NAME=postgres-pvc"
 
+                    // Deployment env 설정 (경고 무시)
+                    sh "kubectl set env deployment/postgres POSTGRES_PVC_NAME=postgres-pvc || true"
+
+                    sh "kubectl --context=${context} apply -f ./k8s/db/postgres-deployment.yaml"
                     // PostgreSQL 배포가 완료될 때까지 대기
                     sh 'kubectl rollout status deployment/postgres'
 

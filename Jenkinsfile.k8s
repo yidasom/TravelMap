@@ -47,7 +47,7 @@ pipeline {
                 dir('backend') {
                     sh """
                         docker buildx build \\
-                          --platform linux/amd64,linux/arm64 \\
+                          --platform linux/amd64 \\
                           -t ${BACKEND_IMAGE_NAME} \\
                           -t ${BACKEND_IMAGE_LATEST_NAME} \\
                           --push .
@@ -69,10 +69,8 @@ pipeline {
             steps {
                 dir('frontend') {
                     sh """
-                        dos2unix docker-entrypoint.sh
-                        chmod +x docker-entrypoint.sh
                         docker buildx build \\
-                          --platform linux/amd64,linux/arm64 \\
+                          --platform linux/amd64 \\
                           -t ${FRONTEND_IMAGE_NAME} \\
                           -t ${FRONTEND_IMAGE_LATEST_NAME} \\
                           --push .

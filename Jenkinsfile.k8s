@@ -27,7 +27,7 @@ pipeline {
         stage('Prepare Docker Buildx') {
             steps {
                 sh """
-                    docker buildx create --use --name multiarch-builder || true
+                    docker buildx create --use --name mybuilder --driver-opt network=host || true
                     docker buildx use multiarch-builder
                     docker buildx inspect --bootstrap
                 """
@@ -48,7 +48,7 @@ pipeline {
                     sh """
                         if ! docker pull ${BACKEND_IMAGE_NAME}; then
                             ./gradlew clean build
-                            docker buildx build --platform linux/amd64 -t ${BACKEND_IMAGE_NAME} --push .
+                            docker buildx build --platform linux/amd64,linux/arm64 -t ${BACKEND_IMAGE_NAME} --push .
                         fi
                     """
 //                    sh """
@@ -69,7 +69,7 @@ pipeline {
                         if ! docker pull ${FRONTEND_IMAGE_NAME}; then
                             npm install
                             npm run build
-                            docker buildx build --platform linux/amd64 -t ${FRONTEND_IMAGE_NAME} --push .
+                            docker buildx build --platform linux/amd64,linux/arm64 -t ${FRONTEND_IMAGE_NAME} --push .
                         fi
                     """
 //                    sh 'npm install'

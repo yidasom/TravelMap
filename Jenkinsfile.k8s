@@ -36,7 +36,7 @@ pipeline {
                 docker buildx inspect --bootstrap
 
                 docker buildx build \\
-                  --platform linux/amd64 \\
+                  --platform linux/amd64,linux/arm64 \\
                   -t ${BACKEND_IMAGE_NAME} \\
                   -t ${BACKEND_IMAGE_LATEST_NAME} \\
                   --push .
@@ -64,7 +64,7 @@ pipeline {
                 docker buildx inspect --bootstrap
 
                 docker buildx build \\
-                  --platform linux/amd64 \\
+                  --platform linux/amd64,linux/arm64 \\
                   -t ${FRONTEND_IMAGE_NAME} \\
                   -t ${FRONTEND_IMAGE_LATEST_NAME} \\
                   --push .

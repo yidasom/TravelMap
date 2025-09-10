@@ -24,15 +24,6 @@ pipeline {
     }
 
     stages {
-        stage('Prepare Docker Buildx') {
-            steps {
-                sh """
-                    docker buildx create --use --name multiarch-builder --driver-opt network=host || true
-                    docker buildx use multiarch-builder
-                    docker buildx inspect --bootstrap
-                """
-            }
-        }
 
         stage('Build Backend') {
             steps {
@@ -46,27 +37,25 @@ pipeline {
             steps {
                 dir('backend') {
                     sh """
-                        docker buildx build \\
-                          --platform linux/amd64,linux/arm64 \\
-                          -t ${BACKEND_IMAGE_NAME} \\
-                          -t ${BACKEND_IMAGE_LATEST_NAME} \\
-                          --push .
+                        docker build -t ${BACKEND_IMAGE_NAME} .
+                        docker tag ${BACKEND_IMAGE_NAME} ${BACKEND_IMAGE_LATEST_NAME}
+                        docker push ${BACKEND_IMAGE_NAME}
+                        docker push ${BACKEND_IMAGE_LATEST_NAME}
                     """
                 }
             }
         }
 
-        stage('Build Frontend') {
+        stage('Build & Push Frontend Docker Image') {
             steps {
                 dir('frontend') {
                     sh 'npm install'
                     sh 'npm run build'
                     sh """
-                        docker buildx build \\
-                          --platform linux/amd64,linux/arm64 \\
-                          -t ${FRONTEND_IMAGE_NAME} \\
-                          -t ${FRONTEND_IMAGE_LATEST_NAME} \\
-                          --push .
+                        docker build -t ${FRONTEND_IMAGE_NAME} .
+                        docker tag ${FRONTEND_IMAGE_NAME} ${FRONTEND_IMAGE_LATEST_NAME}
+                        docker push ${FRONTEND_IMAGE_NAME}
+                        docker push ${FRONTEND_IMAGE_LATEST_NAME}
                     """
                 }
             }

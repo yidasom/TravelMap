@@ -37,7 +37,6 @@ pipeline {
         stage('Build Backend') {
             steps {
                 dir('backend') {
-                    // 모든 캐시를 지우고 다시 빌드
                     sh './gradlew clean build'
                 }
             }
@@ -60,7 +59,6 @@ pipeline {
         stage('Build Frontend') {
             steps {
                 dir('frontend') {
-                    // npm 의존성 설치 및 빌드
                     sh 'npm install'
                     sh 'npm run build'
                 }
@@ -71,6 +69,8 @@ pipeline {
             steps {
                 dir('frontend') {
                     sh """
+                        dos2unix docker-entrypoint.sh
+                        chmod +x docker-entrypoint.sh
                         docker buildx build \\
                           --platform linux/amd64,linux/arm64 \\
                           -t ${FRONTEND_IMAGE_NAME} \\
@@ -84,7 +84,7 @@ pipeline {
         stage('Prepare K8s Namespace & Secret') {
             steps {
                 sh """
-                    kubectl --context=${K8S_CONTEXT} get ns ${NAMESPACE} || kubectl --context=${K8S_CONTEXT} create ns ${NAMESPACE}
+                    kubectl --context=${K8S_CONTEXT} get ns ${NAMESPACE} || \
                     kubectl --context=${K8S_CONTEXT} apply -f /home/jenkins/k8s/secret.yaml -n ${NAMESPACE}
                 """
             }
@@ -93,7 +93,6 @@ pipeline {
         stage('Deploy to K8s with Helm') {
             steps {
                 sh """
-                    set -e
                     helm upgrade --install travelmap ./helm/travelmap \\
                         --namespace ${NAMESPACE} \\
                         -f ./helm/travelmap/values-k8s.yaml \\
@@ -106,7 +105,6 @@ pipeline {
         stage('Wait for Deployment Rollout') {
             steps {
                 sh """
-                    set -e
                     kubectl --context=${K8S_CONTEXT} -n ${NAMESPACE} rollout status deployment/travelmap-backend
                     kubectl --context=${K8S_CONTEXT} -n ${NAMESPACE} rollout status deployment/travelmap-frontend
                 """

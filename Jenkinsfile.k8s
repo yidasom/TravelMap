@@ -24,6 +24,16 @@ pipeline {
     }
 
     stages {
+        stage('Prepare Docker Buildx') {
+            steps {
+                sh """
+                    docker buildx create --use --name multiarch-builder || true
+                    docker buildx use multiarch-builder
+                    docker buildx inspect --bootstrap
+                """
+            }
+        }
+
         stage('Build Backend') {
             steps {
                 dir('backend') {
@@ -37,16 +47,12 @@ pipeline {
             steps {
                 dir('backend') {
                     sh """
-                docker buildx create --use --name multiarch-builder || true
-                docker buildx use multiarch-builder
-                docker buildx inspect --bootstrap
-
-                docker buildx build \\
-                  --platform linux/amd64,linux/arm64 \\
-                  -t ${BACKEND_IMAGE_NAME} \\
-                  -t ${BACKEND_IMAGE_LATEST_NAME} \\
-                  --push .
-            """
+                        docker buildx build \\
+                          --platform linux/amd64,linux/arm64 \\
+                          -t ${BACKEND_IMAGE_NAME} \\
+                          -t ${BACKEND_IMAGE_LATEST_NAME} \\
+                          --push .
+                    """
                 }
             }
         }
@@ -65,45 +71,16 @@ pipeline {
             steps {
                 dir('frontend') {
                     sh """
-                docker buildx create --use --name multiarch-builder || true
-                docker buildx use multiarch-builder
-                docker buildx inspect --bootstrap
-
-                docker buildx build \\
-                  --platform linux/amd64,linux/arm64 \\
-                  -t ${FRONTEND_IMAGE_NAME} \\
-                  -t ${FRONTEND_IMAGE_LATEST_NAME} \\
-                  --push .
-            """
+                        docker buildx build \\
+                          --platform linux/amd64,linux/arm64 \\
+                          -t ${FRONTEND_IMAGE_NAME} \\
+                          -t ${FRONTEND_IMAGE_LATEST_NAME} \\
+                          --push .
+                    """
                 }
             }
         }
 
-//        stage('Deploy to K8s') {
-//            steps {
-//                script {
-//                    def context = "kubernetes-admin@kubernetes"
-//
-//                    // Secret 먼저 적용 (기존 방식 유지)
-//                    sh "kubectl --context=${context} apply -f /home/jenkins/k8s/secret.yaml"
-//
-//                    // Helm 배포
-////                    withCredentials([file(credentialsId: 'kubeconfig-k8s', variable: 'KUBECONFIG')]) {
-//                        sh """
-//                                helm upgrade --install travelmap ./helm/travelmap \
-//                                  --namespace travelmap --create-namespace \
-//                                  -f ./helm/travelmap/values-k8s.yaml \
-//                                  --set backend.image.tag=${BACKEND_IMAGE_TAG} \
-//                                  --set frontend.image.tag=${FRONTEND_IMAGE_TAG}
-//                            """
-//
-//                        // 배포 완료 대기
-//                        sh "kubectl --context=${context} -n travelmap rollout status deployment/travelmap-backend"
-//                        sh "kubectl --context=${context} -n travelmap rollout status deployment/travelmap-frontend"
-////                    }
-//                }
-//            }
-//        }
         stage('Prepare K8s Namespace & Secret') {
             steps {
                 sh """
@@ -116,10 +93,11 @@ pipeline {
         stage('Deploy to K8s with Helm') {
             steps {
                 sh """
-                    helm upgrade --install travelmap ./helm/travelmap \
-                        --namespace ${NAMESPACE} \
-                        -f ./helm/travelmap/values-k8s.yaml \
-                        --set backend.image.tag=${BACKEND_IMAGE_TAG} \
+                    set -e
+                    helm upgrade --install travelmap ./helm/travelmap \\
+                        --namespace ${NAMESPACE} \\
+                        -f ./helm/travelmap/values-k8s.yaml \\
+                        --set backend.image.tag=${BACKEND_IMAGE_TAG} \\
                         --set frontend.image.tag=${FRONTEND_IMAGE_TAG}
                 """
             }
@@ -127,8 +105,11 @@ pipeline {
 
         stage('Wait for Deployment Rollout') {
             steps {
-                sh "kubectl --context=${K8S_CONTEXT} -n ${NAMESPACE} rollout status deployment/travelmap-backend"
-                sh "kubectl --context=${K8S_CONTEXT} -n ${NAMESPACE} rollout status deployment/travelmap-frontend"
+                sh """
+                    set -e
+                    kubectl --context=${K8S_CONTEXT} -n ${NAMESPACE} rollout status deployment/travelmap-backend
+                    kubectl --context=${K8S_CONTEXT} -n ${NAMESPACE} rollout status deployment/travelmap-frontend
+                """
             }
         }
     }

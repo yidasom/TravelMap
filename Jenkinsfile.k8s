@@ -9,14 +9,14 @@ pipeline {
 
     environment {
         // 백엔드 이미지 정보
-        BACKEND_IMAGE_TAG = "latest"
+        BACKEND_IMAGE_TAG = "v1.0.0"
         BACKEND_IMAGE_NAME = "somlh1212/travelmap-backend:${BACKEND_IMAGE_TAG}"
         BACKEND_IMAGE_LATEST_NAME = "somlh1212/travelmap-backend:latest"
 
         // 프론트엔드 이미지 정보
-        FRONTEND_IMAGE_TAG = "latest"
+        FRONTEND_IMAGE_TAG = "v1.0.0"
         FRONTEND_IMAGE_NAME = "somlh1212/travelmap-frontend:${FRONTEND_IMAGE_TAG}"
-        FRONTEND_IMAGE_LATEST_NAME = "somlh1212/travelmap-frontend:latest"
+        FRONTEND_IMAGE_LATEST_NAME = "somlh1212/travelmap-frontend:latest}"
 
         // Kubernetes context
         K8S_CONTEXT = "kubernetes-admin@kubernetes"
@@ -46,12 +46,18 @@ pipeline {
             steps {
                 dir('backend') {
                     sh """
-                        docker buildx build \\
-                          --platform linux/amd64 \\
-                          -t ${BACKEND_IMAGE_NAME} \\
-                          -t ${BACKEND_IMAGE_LATEST_NAME} \\
-                          --push .
+                        if ! docker pull ${BACKEND_IMAGE_NAME}; then
+                            ./gradlew clean build
+                            docker buildx build --platform linux/amd64 -t ${BACKEND_IMAGE_NAME} --push .
+                        fi
                     """
+//                    sh """
+//                        docker buildx build \\
+//                          --platform linux/amd64 \\
+//                          -t ${BACKEND_IMAGE_NAME} \\
+//                          -t ${BACKEND_IMAGE_LATEST_NAME} \\
+//                          --push .
+//                    """
                 }
             }
         }
@@ -59,22 +65,15 @@ pipeline {
         stage('Build Frontend') {
             steps {
                 dir('frontend') {
-                    sh 'npm install'
-                    sh 'npm run build'
-                }
-            }
-        }
-
-        stage('Build & Push Frontend Docker Image') {
-            steps {
-                dir('frontend') {
                     sh """
-                        docker buildx build \\
-                          --platform linux/amd64 \\
-                          -t ${FRONTEND_IMAGE_NAME} \\
-                          -t ${FRONTEND_IMAGE_LATEST_NAME} \\
-                          --push .
+                        if ! docker pull ${FRONTEND_IMAGE_NAME}; then
+                            npm install
+                            npm run build
+                            docker buildx build --platform linux/amd64 -t ${FRONTEND_IMAGE_NAME} --push .
+                        fi
                     """
+//                    sh 'npm install'
+//                    sh 'npm run build'
                 }
             }
         }
@@ -82,7 +81,7 @@ pipeline {
         stage('Prepare K8s Namespace & Secret') {
             steps {
                 sh """
-                    kubectl --context=${K8S_CONTEXT} get ns ${NAMESPACE} || \
+                    kubectl --context=${K8S_CONTEXT} get ns ${NAMESPACE} || kubectl --context=${K8S_CONTEXT} create ns ${NAMESPACE}
                     kubectl --context=${K8S_CONTEXT} apply -f /home/jenkins/k8s/secret.yaml -n ${NAMESPACE}
                 """
             }

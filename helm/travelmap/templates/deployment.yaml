@@ -43,7 +43,7 @@ spec:
             resources:
               {{- with .Values.backend.resources }}
                 {{- toYaml . | nindent 12 }}
-                {{- end }}
+              {{- end }}
 
 ---
 
@@ -86,4 +86,4 @@ spec:
           resources:
             {{- with .Values.frontend.resources }}
               {{- toYaml . | nindent 12 }}
-              {{- end }}
+            {{- end }}

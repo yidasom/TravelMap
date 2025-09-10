@@ -3,6 +3,8 @@ pipeline {
 
     tools {
         nodejs 'NodeJS'
+        jdk 'jdk-21'
+        gradle 'gradle-8.14.3'
     }
 
     environment {
@@ -15,6 +17,10 @@ pipeline {
         FRONTEND_IMAGE_TAG = "latest"
         FRONTEND_IMAGE_NAME = "somlh1212/travelmap-frontend:${FRONTEND_IMAGE_TAG}"
         FRONTEND_IMAGE_LATEST_NAME = "somlh1212/travelmap-frontend:latest"
+
+        // Kubernetes context
+        K8S_CONTEXT = "kubernetes-admin@kubernetes"
+        NAMESPACE = "travelmap"
     }
 
     stages {
@@ -73,29 +79,56 @@ pipeline {
             }
         }
 
-        stage('Deploy to K8s') {
+//        stage('Deploy to K8s') {
+//            steps {
+//                script {
+//                    def context = "kubernetes-admin@kubernetes"
+//
+//                    // Secret 먼저 적용 (기존 방식 유지)
+//                    sh "kubectl --context=${context} apply -f /home/jenkins/k8s/secret.yaml"
+//
+//                    // Helm 배포
+////                    withCredentials([file(credentialsId: 'kubeconfig-k8s', variable: 'KUBECONFIG')]) {
+//                        sh """
+//                                helm upgrade --install travelmap ./helm/travelmap \
+//                                  --namespace travelmap --create-namespace \
+//                                  -f ./helm/travelmap/values-k8s.yaml \
+//                                  --set backend.image.tag=${BACKEND_IMAGE_TAG} \
+//                                  --set frontend.image.tag=${FRONTEND_IMAGE_TAG}
+//                            """
+//
+//                        // 배포 완료 대기
+//                        sh "kubectl --context=${context} -n travelmap rollout status deployment/travelmap-backend"
+//                        sh "kubectl --context=${context} -n travelmap rollout status deployment/travelmap-frontend"
+////                    }
+//                }
+//            }
+//        }
+        stage('Prepare K8s Namespace & Secret') {
             steps {
-                script {
-                    def context = "kubernetes-admin@kubernetes"
+                sh """
+                    kubectl --context=${K8S_CONTEXT} get ns ${NAMESPACE} || kubectl --context=${K8S_CONTEXT} create ns ${NAMESPACE}
+                    kubectl --context=${K8S_CONTEXT} apply -f /home/jenkins/k8s/secret.yaml -n ${NAMESPACE}
+                """
+            }
+        }
 
-                    // Secret 먼저 적용 (기존 방식 유지)
-                    sh "kubectl --context=${context} apply -f /home/jenkins/k8s/secret.yaml"
+        stage('Deploy to K8s with Helm') {
+            steps {
+                sh """
+                    helm upgrade --install travelmap ./helm/travelmap \
+                        --namespace ${NAMESPACE} \
+                        -f ./helm/travelmap/values-k8s.yaml \
+                        --set backend.image.tag=${BACKEND_IMAGE_TAG} \
+                        --set frontend.image.tag=${FRONTEND_IMAGE_TAG}
+                """
+            }
+        }
 
-                    // Helm 배포
-//                    withCredentials([file(credentialsId: 'kubeconfig-k8s', variable: 'KUBECONFIG')]) {
-                        sh """
-                                helm upgrade --install travelmap ./helm/travelmap \
-                                  --namespace travelmap --create-namespace \
-                                  -f ./helm/travelmap/values-k8s.yaml \
-                                  --set backend.image.tag=${BACKEND_IMAGE_TAG} \
-                                  --set frontend.image.tag=${FRONTEND_IMAGE_TAG}
-                            """
-
-                        // 배포 완료 대기
-                        sh "kubectl --context=${context} -n travelmap rollout status deployment/travelmap-backend"
-                        sh "kubectl --context=${context} -n travelmap rollout status deployment/travelmap-frontend"
-//                    }
-                }
+        stage('Wait for Deployment Rollout') {
+            steps {
+                sh "kubectl --context=${K8S_CONTEXT} -n ${NAMESPACE} rollout status deployment/travelmap-backend"
+                sh "kubectl --context=${K8S_CONTEXT} -n ${NAMESPACE} rollout status deployment/travelmap-frontend"
             }
         }
     }

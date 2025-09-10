@@ -35,12 +35,12 @@ frontend:
       memory: "512Mi"
 
 db:
-  type: k8s # k8s / gke
-  host: postgres
+  type: external
+  host: host.docker.internal
   port: 5432
   username: travelmap
   password:
-    secretName: travelmap-secret
+    secretName: travelmap-external-secret
     secretKey: db-password
 
 imagePullSecrets: []

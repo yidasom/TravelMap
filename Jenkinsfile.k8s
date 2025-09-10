@@ -66,6 +66,7 @@ pipeline {
                 sh """
                     kubectl --context=${K8S_CONTEXT} get ns ${NAMESPACE} || kubectl --context=${K8S_CONTEXT} create ns ${NAMESPACE}
                     kubectl --context=${K8S_CONTEXT} apply -f /home/jenkins/k8s/secret.yaml -n ${NAMESPACE}
+                    kubectl --context=${K8S_CONTEXT} apply -f /home/jenkins/k8s/secret-external.yaml -n ${NAMESPACE}
                 """
             }
         }
@@ -73,11 +74,11 @@ pipeline {
         stage('Deploy to K8s with Helm') {
             steps {
                 sh """
-                    helm upgrade --install travelmap ./helm/travelmap \\
-                        --namespace ${NAMESPACE} \\
-                        -f ./helm/travelmap/values-k8s.yaml \\
-                        --set backend.image.tag=${BACKEND_IMAGE_TAG} \\
-                        --set frontend.image.tag=${FRONTEND_IMAGE_TAG}
+                helm upgrade --install travelmap ./helm/travelmap \\
+                    --namespace ${NAMESPACE} \\
+                    -f /home/jenkins/helm/values.yaml \\
+                    --set backend.image.tag=${BACKEND_IMAGE_TAG} \\
+                    --set frontend.image.tag=${FRONTEND_IMAGE_TAG}
                 """
             }
         }

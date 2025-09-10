@@ -36,7 +36,7 @@ frontend:
 
 db:
   type: external
-  host: host.docker.internal
+  host: 192.168.0.19
   port: 5432
   username: travelmap
   password:

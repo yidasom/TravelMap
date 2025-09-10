@@ -7,12 +7,12 @@ pipeline {
 
     environment {
         // 백엔드 이미지 정보
-        BACKEND_IMAGE_TAG = "${env.BUILD_NUMBER}"
+        BACKEND_IMAGE_TAG = "latest"
         BACKEND_IMAGE_NAME = "somlh1212/travelmap-backend:${BACKEND_IMAGE_TAG}"
         BACKEND_IMAGE_LATEST_NAME = "somlh1212/travelmap-backend:latest"
 
         // 프론트엔드 이미지 정보
-        FRONTEND_IMAGE_TAG = "${env.BUILD_NUMBER}"
+        FRONTEND_IMAGE_TAG = "latest"
         FRONTEND_IMAGE_NAME = "somlh1212/travelmap-frontend:${FRONTEND_IMAGE_TAG}"
         FRONTEND_IMAGE_LATEST_NAME = "somlh1212/travelmap-frontend:latest"
     }

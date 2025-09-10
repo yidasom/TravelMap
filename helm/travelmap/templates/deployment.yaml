@@ -22,11 +22,11 @@ spec:
               - containerPort: {{ .Values.backend.service.port }}
             env:
               - name: SPRING_PROFILES_ACTIVE
-                value: {{ .Values.backend.env.SPRING_PROFILES_ACTIVE }}
+                value: "{{ .Values.backend.env.SPRING_PROFILES_ACTIVE }}"
               - name: SPRING_DATASOURCE_URL
-                value: jdbc:postgresql://{{ .Values.db.host }}:{{ .Values.db.port }}/travelmap
+                value: "jdbc:postgresql://{{ .Values.db.host }}:{{ .Values.db.port }}/travelmap"
               - name: SPRING_DATASOURCE_USERNAME
-                value: {{ .Values.db.username }}
+                value: "{{ .Values.db.username }}"
               - name: SPRING_DATASOURCE_PASSWORD
                 valueFrom:
                   secretKeyRef:
@@ -41,7 +41,9 @@ spec:
                 path: /
                 port: {{ .Values.backend.service.port }}
             resources:
-              {{- toYaml .Values.backend.resources | nindent 12 }}
+              {{- with .Values.backend.resources }}
+                {{- toYaml . | nindent 12 }}
+                {{- end }}
 
 ---
 
@@ -82,4 +84,6 @@ spec:
               path: /
               port: {{ .Values.frontend.service.port }}
           resources:
-            {{- toYaml .Values.frontend.resources | nindent 12 }}
+            {{- with .Values.frontend.resources }}
+              {{- toYaml . | nindent 12 }}
+              {{- end }}

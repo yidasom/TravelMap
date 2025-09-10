@@ -92,7 +92,8 @@ pipeline {
                             """
 
                         // 배포 완료 대기
-                        sh "kubectl --context=${context} rollout status deployment/travelmap"
+                        sh "kubectl --context=${context} -n travelmap rollout status deployment/travelmap-backend"
+                        sh "kubectl --context=${context} -n travelmap rollout status deployment/travelmap-frontend"
 //                    }
                 }
             }

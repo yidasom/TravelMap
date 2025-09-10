@@ -76,7 +76,7 @@ pipeline {
                 sh """
                 helm upgrade --install travelmap ./helm/travelmap \\
                     --namespace ${NAMESPACE} \\
-                    -f /home/jenkins/helm/values.yaml \\
+                    -f ./helm/travelmap/values.yaml \\
                     --set backend.image.tag=${BACKEND_IMAGE_TAG} \\
                     --set frontend.image.tag=${FRONTEND_IMAGE_TAG}
                 """

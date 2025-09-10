@@ -4,7 +4,7 @@ backend:
   image:
     repository: somlh1212/travelmap-backend
     tag: v1.0.0
-    pullPolicy: IfNotPresent
+    pullPolicy: Always
   service:
     type: ClusterIP # 내부용
     port: 8080
@@ -22,7 +22,7 @@ frontend:
   image:
     repository: somlh1212/travelmap-frontend
     tag: v1.0.0
-    pullPolicy: IfNotPresent
+    pullPolicy: Always
   service:
     type: LoadBalancer  # 외부용
     port: 80

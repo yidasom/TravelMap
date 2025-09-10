@@ -1,4 +1,4 @@
 db:
   type: k8s
-  host: postgres
+  host: travelmap-postgres
   port: 5432

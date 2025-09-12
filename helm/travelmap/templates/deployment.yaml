@@ -31,7 +31,7 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: {{ .Values.db.password.secretName }}
-                  key: db-username
+                  key: db-password
             - name: YOUTUBE_API_KEY
               valueFrom:
                 secretKeyRef:

@@ -41,10 +41,16 @@ spec:
             httpGet:
               path: /actuator/health
               port: {{ .Values.backend.service.port }}
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            failureThreshold: 10
           readinessProbe:
             httpGet:
               path: /actuator/health
               port: {{ .Values.backend.service.port }}
+            initialDelaySeconds: 60
+            periodSeconds: 15
+            failureThreshold: 5
           resources:
             {{- toYaml .Values.backend.resources | nindent 12 }}
 

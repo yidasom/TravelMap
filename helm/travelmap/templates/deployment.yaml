@@ -15,38 +15,38 @@ spec:
         app: {{ include "travelmap.fullname" . }}-backend
     spec:
       containers:
-          - name: backend
-            image: "{{ .Values.backend.image.repository }}:{{ .Values.backend.image.tag }}"
-            imagePullPolicy: {{ .Values.backend.image.pullPolicy }}
-            ports:
-              - containerPort: {{ .Values.backend.service.port }}
-            env:
-              - name: SPRING_PROFILES_ACTIVE
-                value: "{{ .Values.backend.env.SPRING_PROFILES_ACTIVE }}"
-              - name: SPRING_DATASOURCE_URL
-                value: "jdbc:postgresql://{{ .Values.db.host }}:{{ .Values.db.port }}/travelmap"
-              - name: SPRING_DATASOURCE_USERNAME
-                value: "{{ .Values.db.username }}"
-              - name: SPRING_DATASOURCE_PASSWORD
-                valueFrom:
-                  secretKeyRef:
-                    name: {{ .Values.db.password.secretName }}
-                    key: {{ .Values.db.password.secretKey }}
-              - name: YOUTUBE_API_KEY
-                valueFrom:
-                  secretKeyRef:
-                    name: {{ .Values.backend.env.youtubeApiSecret }}
-                    key: {{ .Values.backend.env.youtubeApiKey }}
-            livenessProbe:
-              httpGet:
-                path: /
-                port: {{ .Values.backend.service.port }}
-            readinessProbe:
-              httpGet:
-                path: /
-                port: {{ .Values.backend.service.port }}
-            resources:
-              {{- toYaml .Values.backend.resources | nindent 10 }}
+        - name: backend
+          image: "{{ .Values.backend.image.repository }}:{{ .Values.backend.image.tag }}"
+          imagePullPolicy: {{ .Values.backend.image.pullPolicy }}
+          ports:
+            - containerPort: {{ .Values.backend.service.port }}
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: "{{ .Values.backend.env.SPRING_PROFILES_ACTIVE }}"
+            - name: SPRING_DATASOURCE_URL
+              value: "jdbc:postgresql://{{ .Values.db.host }}:{{ .Values.db.port }}/travelmap"
+            - name: SPRING_DATASOURCE_USERNAME
+              value: "{{ .Values.db.username }}"
+            - name: SPRING_DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.db.password.secretName }}
+                  key: {{ .Values.db.password.secretKey }}
+            - name: YOUTUBE_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.backend.env.youtubeApiSecret }}
+                  key: {{ .Values.backend.env.youtubeApiKey }}
+          livenessProbe:
+            httpGet:
+              path: /
+              port: {{ .Values.backend.service.port }}
+          readinessProbe:
+            httpGet:
+              path: /
+              port: {{ .Values.backend.service.port }}
+          resources:
+            {{- toYaml .Values.backend.resources | nindent 6 }}
 
 ---
 
@@ -87,6 +87,4 @@ spec:
               path: /
               port: {{ .Values.frontend.service.port }}
           resources:
-            {{- with .Values.frontend.resources }}
-              {{- toYaml . | nindent 10 }}
-            {{- end }}
+            {{- toYaml .Values.frontend.resources | nindent 6 }}

@@ -46,9 +46,7 @@ spec:
                 path: /
                 port: {{ .Values.backend.service.port }}
             resources:
-              {{- with .Values.backend.resources }}
-                {{- toYaml . | nindent 12 }}
-              {{- end }}
+              {{- toYaml .Values.backend.resources | nindent 12 }}
 
 ---
 

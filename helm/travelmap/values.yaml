@@ -37,8 +37,8 @@ frontend:
       memory: "512Mi"
 
 db:
-  type: external
-  host: 192.168.0.19
+  type: internal
+  host: postgres
   port: 5432
   username: travelmap
   password:

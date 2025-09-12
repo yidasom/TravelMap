@@ -10,7 +10,7 @@ backend:
     port: 8080
   env:
     SPRING_PROFILES_ACTIVE: prod
-    youtubeApiSecret: travelmap
+    youtubeApiSecret: travelmap-secret
     youtubeApiKey: youtube-api-key
   resources:
     requests:

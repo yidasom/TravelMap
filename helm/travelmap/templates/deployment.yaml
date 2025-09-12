@@ -39,11 +39,11 @@ spec:
                   key: {{ .Values.backend.env.youtubeApiKey }}
           livenessProbe:
             httpGet:
-              path: /
+              path: /actuator/health
               port: {{ .Values.backend.service.port }}
           readinessProbe:
             httpGet:
-              path: /
+              path: /actuator/health
               port: {{ .Values.backend.service.port }}
           resources:
             {{- toYaml .Values.backend.resources | nindent 12 }}

@@ -108,7 +108,7 @@ pipeline {
                     sh """
                             helm upgrade --install travelmap ./helm/travelmap \\
                               --namespace ${NAMESPACE}  \\
-                              -f ./helm/travelmap/values.yaml \\
+                              -f ./helm/travelmap/values-gke.yaml \\
                               --set backend.image.tag=${BACKEND_IMAGE_TAG} \\
                               --set frontend.image.tag=${FRONTEND_IMAGE_TAG}
                         """

@@ -6,3 +6,8 @@ build
 # Git
 .git
 .gitignore
+
+.gradle
+.settings
+.idea
+*.iml

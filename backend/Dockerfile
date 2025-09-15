@@ -1,6 +1,13 @@
-# FROM --platform=linux/amd64 openjdk:21-slim-buster
+# Gradle build
+FROM gradle:8.3-jdk21 AS builder
+WORKDIR /app
+COPY build.gradle settings.gradle ./
+COPY gradle ./gradle
+COPY src ./src
+RUN gradle build -x test
+
 FROM openjdk:21-slim-buster
 WORKDIR /app
-COPY build/libs/*.jar app.jar
+COPY --from=builder /app/build/libs/*.jar app.jar
 EXPOSE 8080
-CMD ["java", "-jar", "/app/app.jar"]
+CMD ["java", "-jar", "app.jar"]

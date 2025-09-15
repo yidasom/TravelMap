@@ -24,7 +24,7 @@ pipeline {
         GKE_REGION = 'asia-northeast3'
         GKE_CLUSTER_NAME = 'travelmap-cluster'
 
-        NAMESPACE = "travelmap"
+        NAMESPACE = "travelmap-gke"
     }
 
     stages {
@@ -106,8 +106,11 @@ pipeline {
 
                     // Helm 배포
                     sh """
+                            kubectl config use-context ${context}
+
                             helm upgrade --install travelmap ./helm/travelmap \\
                               --namespace ${NAMESPACE}  \\
+                              --create-namespace \\
                               -f ./helm/travelmap/values-gke.yaml \\
                               --set backend.image.tag=${BACKEND_IMAGE_TAG} \\
                               --set frontend.image.tag=${FRONTEND_IMAGE_TAG}

@@ -20,7 +20,7 @@ pipeline {
 
         // Kubernetes context
         K8S_CONTEXT = "kubernetes-admin@kubernetes"
-        NAMESPACE = "travelmap"
+        NAMESPACE = "travelmap-k8s"
     }
 
     stages {
@@ -74,8 +74,11 @@ pipeline {
         stage('Deploy to K8s with Helm') {
             steps {
                 sh """
+                kubectl config use-context kubernetes-admin@kubernetes
+
                 helm upgrade --install travelmap ./helm/travelmap \\
                     --namespace ${NAMESPACE} \\
+                    --create-namespace \\
                     -f ./helm/travelmap/values-k8s.yaml \\
                     --set backend.image.tag=${BACKEND_IMAGE_TAG} \\
                     --set frontend.image.tag=${FRONTEND_IMAGE_TAG}

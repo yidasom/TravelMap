@@ -14,10 +14,10 @@ backend:
     youtubeApiKey: youtube-api-key
   resources:
     requests:
-      cpu: "250m"
+      cpu: "100m"
       memory: "256Mi"
     limits:
-      cpu: "500m"
+      cpu: "200m"
       memory: "512Mi"
 
 frontend:
@@ -30,11 +30,11 @@ frontend:
     port: 80
   resources:
     requests:
-      cpu: "200m"
-      memory: "256Mi"
+      cpu: "50m"
+      memory: "128Mi"
     limits:
-      cpu: "400m"
-      memory: "512Mi"
+      cpu: "100m"
+      memory: "256Mi"
 
 db:
   type: internal

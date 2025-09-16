@@ -93,7 +93,7 @@ pipeline {
                     def context = "gke_cogent-spirit-468810-j1_asia-northeast3_travelmap-cluster"
                     sh "kubectl config use-context ${context}"
                     // 네임스페이스가 없는 경우 생성
-                    sh "kubectl create namespace travelmap || true"
+                    sh "kubectl create namespace ${NAMESPACE} || true"
 
                     sh "kubectl apply -f /home/jenkins/k8s/secret.yaml -n ${NAMESPACE}"
                     sh "kubectl apply -f /home/jenkins/k8s/secret-external.yaml -n ${NAMESPACE}"

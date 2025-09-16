@@ -13,10 +13,13 @@ backend:
     DB_HOST: postgres.default.svc.cluster.local
     DB_PORT: "5432"
     DB_USERNAME: travelmap
-    DB_PASSWORD_SECRET: travelmap-external-secret
-    DB_PASSWORD_KEY: db-password
-    youtubeApiSecret: travelmap-secret
-    youtubeApiKey: youtube-api-key
+  secrets: # 시크릿 정보를 한 곳에 모아 관리
+    dbPassword:
+      secretName: travelmap-external-secret
+      secretKey: db-password
+    youtubeApiKey:
+      secretName: travelmap-secret
+      secretKey: youtube-api-key
   resources:
     requests:
       cpu: "250m"
@@ -51,7 +54,9 @@ db:
     secretName: travelmap-external-secret
     secretKey: db-password
 
-imagePullSecrets: []
+imagePullSecrets:
+  - name: dockerhub-credentials
+
 nameOverride: ""
 fullnameOverride: ""
 

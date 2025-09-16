@@ -1,5 +1,5 @@
 # Gradle build
-FROM gradle:8.3-jdk21-jammy AS builder
+FROM gradle:8.3-jdk21 AS builder
 WORKDIR /app
 COPY build.gradle settings.gradle ./
 COPY gradle ./gradle

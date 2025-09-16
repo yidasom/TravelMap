@@ -30,7 +30,7 @@ spec:
 
             # DB 환경 변수 설정
             - name: SPRING_DATASOURCE_URL
-              value: "jdbc:postgresql://postgres.default.svc.cluster.local:5432/travelmap"
+              value: "jdbc:postgresql://travelmap-postgres.travelmap-gke.svc.cluster.local:5432/travelmap"
             - name: SPRING_DATASOURCE_USERNAME
               value: "travelmap"
             - name: SPRING_DATASOURCE_PASSWORD

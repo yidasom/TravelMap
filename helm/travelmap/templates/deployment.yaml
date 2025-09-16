@@ -30,9 +30,10 @@ spec:
 
             # DB 환경 변수 설정
             - name: SPRING_DATASOURCE_URL
-              value: "jdbc:postgresql://travelmap-postgres.travelmap-gke.svc.cluster.local:5432/travelmap"
+#              value: "jdbc:postgresql://travelmap-postgres.travelmap-gke.svc.cluster.local:5432/travelmap"
+              value: "jdbc:postgresql://{{ include "travelmap.fullname" . }}-postgres.{{ .Release.Namespace }}.svc.cluster.local:5432/travelmap"
             - name: SPRING_DATASOURCE_USERNAME
-              value: "travelmap"
+              value: "{{ .Values.db.username }}"
             - name: SPRING_DATASOURCE_PASSWORD
               valueFrom:
                 secretKeyRef:
@@ -105,3 +106,58 @@ spec:
               port: {{ .Values.frontend.service.port }}
           resources:
             {{- toYaml .Values.frontend.resources | nindent 12 }}
+
+
+---
+
+{{- if .Values.db.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "travelmap.fullname" . }}-postgres
+  labels:
+    app: {{ include "travelmap.fullname" . }}-postgres
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ include "travelmap.fullname" . }}-postgres
+  template:
+    metadata:
+      labels:
+        app: {{ include "travelmap.fullname" . }}-postgres
+    spec:
+      containers:
+          - name: postgres
+            image: postgres:16
+            env:
+              - name: POSTGRES_USER
+                value: {{ .Values.db.username }}
+              - name: POSTGRES_PASSWORD
+                valueFrom:
+                  secretKeyRef:
+                    name: {{ .Values.db.password.secretName }}
+                    key: {{ .Values.db.password.secretKey }}
+            ports:
+              - containerPort: {{ .Values.db.port }}
+            volumeMounts:
+              - name: postgres-storage
+                mountPath: /var/lib/postgresql/data
+      volumes:
+        - name: postgres-storage
+          persistentVolumeClaim:
+            claimName: {{ include "travelmap.fullname" . }}-postgres-pvc
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "travelmap.fullname" . }}-postgres-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+  storageClassName: standard-rwo
+{{- end }}

@@ -42,9 +42,20 @@ frontend:
       memory: "1Gi"
 
 db:
-  enabled: false
+  enabled: true
   type: internal
-  host: postgres.default.svc.cluster.local
+  image:
+    repository: postgres
+    tag: "16"
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 5432
+  persistence:
+    enabled: true
+    size: 10Gi
+    storageClass: standard-rwo
+#  host: postgres.default.svc.cluster.local
   port: 5432
   username: travelmap
   password:

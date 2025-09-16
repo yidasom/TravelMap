@@ -17,7 +17,7 @@ pipeline {
         FRONTEND_IMAGE_LATEST_NAME = "somlh1212/travelmap-frontend:latest"
 
         // Node.js 빌드 시 메모리 제한 증가
-        NODE_OPTIONS = "--max_old_space_size=4096"
+//        NODE_OPTIONS = "--max_old_space_size=4096"
 
         // GKE 정보
         GKE_PROJECT = 'cogent-spirit-468810-j1'
@@ -94,22 +94,20 @@ pipeline {
                         sh "gcloud container clusters get-credentials ${GKE_CLUSTER_NAME} --region ${GKE_REGION} --project ${GKE_PROJECT}"
                     }
                     def context = "gke_cogent-spirit-468810-j1_asia-northeast3_travelmap-cluster"
-                    sh "kubectl --context=${context} apply -f /home/jenkins/k8s/secret.yaml"
-                    sh "kubectl --context=${context} apply -f /home/jenkins/k8s/secret-external.yaml -n ${NAMESPACE}"
+                    sh "kubectl apply -f /home/jenkins/k8s/secret.yaml -n ${NAMESPACE}"
+                    sh "kubectl apply -f /home/jenkins/k8s/secret-external.yaml -n ${NAMESPACE}"
 
                     // Helm 배포
                     sh """
-                            kubectl config use-context ${context}
-
-                            helm upgrade --install travelmap ./helm/travelmap \\
-                              --namespace ${NAMESPACE}  \\
-                              --create-namespace \\
-                              -f ./helm/travelmap/values-gke.yaml \\
-                              --set backend.image.tag=${BACKEND_IMAGE_TAG} \\
-                              --set frontend.image.tag=${FRONTEND_IMAGE_TAG} \\\\
-                              --set backend.image.pullSecrets[0].name=dockerhub-credentials \\\\
-                              --set frontend.image.pullSecrets[0].name=dockerhub-credentials
-                        """
+                        kubectl config use-context ${context}
+    
+                        helm upgrade --install travelmap ./helm/travelmap \\
+                          --namespace ${NAMESPACE}  \\
+                          --create-namespace \\
+                      --values ./helm/travelmap/values-gke.yaml \\
+                      --set backend.image.tag=${BACKEND_IMAGE_TAG} \\
+                      --set frontend.image.tag=${FRONTEND_IMAGE_TAG}
+                    """
 //                    def context = "gke_cogent-spirit-468810-j1_asia-northeast3_travelmap-cluster"
 //
 //                    // 경로를 Jenkinsfile 기준으로 수정
@@ -140,8 +138,8 @@ pipeline {
         stage('Wait for Deployment Rollout') {
             steps {
                 sh """
-                   kubectl --context=${context} -n ${NAMESPACE} rollout status deployment/travelmap-backend
-                   kubectl --context=${context} -n ${NAMESPACE} rollout status deployment/travelmap-frontend
+                   kubectl -n ${NAMESPACE} rollout status deployment/travelmap-backend
+                   kubectl -n ${NAMESPACE} rollout status deployment/travelmap-frontend
                 """
             }
         }

@@ -22,11 +22,11 @@ backend:
       secretKey: youtube-api-key
   resources:
     requests:
-      cpu: "250m"
-      memory: "256Mi"
-    limits:
       cpu: "500m"
       memory: "512Mi"
+    limits:
+      cpu: "1000m"
+      memory: "1024Mi"
 
 frontend:
   image:
@@ -38,10 +38,10 @@ frontend:
     port: 80
   resources:
     requests:
-      cpu: "500m"
+      cpu: "400m"
       memory: "512Mi"
     limits:
-      cpu: "1000m"
+      cpu: "800m"
       memory: "1024Mi"
 
 db:

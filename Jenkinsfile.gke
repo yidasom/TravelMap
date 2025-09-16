@@ -101,12 +101,21 @@ pipeline {
                     // Helm 배포
                     sh """
                         helm upgrade --install travelmap ./helm/travelmap \\
-                          --namespace ${NAMESPACE}  \\
+                          --namespace ${NAMESPACE} \\
                           --create-namespace \\
-                      --values ./helm/travelmap/values-gke.yaml \\
-                      --set backend.image.tag=${BACKEND_IMAGE_TAG} \\
-                      --set frontend.image.tag=${FRONTEND_IMAGE_TAG}
-                    """
+                          --values ./helm/travelmap/values-gke.yaml \\
+                          --set backend.image.tag=${BACKEND_IMAGE_TAG} \\
+                          --set frontend.image.tag=${FRONTEND_IMAGE_TAG} \\
+                          --set backend.resources.requests.cpu=250m \\
+                          --set backend.resources.requests.memory=512Mi \\
+                          --set backend.resources.limits.cpu=500m \\
+                          --set backend.resources.limits.memory=1Gi \\
+                          --set frontend.resources.requests.cpu=200m \\
+                          --set frontend.resources.requests.memory=256Mi \\
+                          --set frontend.resources.limits.cpu=400m \\
+                          --set frontend.resources.limits.memory=512Mi
+                        """
+
 //                    def context = "gke_cogent-spirit-468810-j1_asia-northeast3_travelmap-cluster"
 //
 //                    // 경로를 Jenkinsfile 기준으로 수정

@@ -34,19 +34,19 @@ spec:
     app: {{ $fullName }}-frontend
 ---
 {{- if .Values.db.enabled }}
-  apiVersion: v1
-  kind: Service
-  metadata:
-    name: {{ $fullName }}-postgres
-    labels:
-      {{- include "travelmap.labels" . | nindent 4 }}
-  spec:
-    type: ClusterIP
-    ports:
-      - port: {{ .Values.db.port }}
-        targetPort: {{ .Values.db.port }}
-        protocol: TCP
-        name: db
-    selector:
-      app: {{ $fullName }}-postgres
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ $fullName }}-postgres
+  labels:
+    {{- include "travelmap.labels" . | nindent 4 }}
+spec:
+  type: ClusterIP
+  ports:
+    - port: {{ .Values.db.port }}
+      targetPort: {{ .Values.db.port }}
+      protocol: TCP
+      name: db
+  selector:
+    app: {{ $fullName }}-postgres
 {{- end }}

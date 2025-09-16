@@ -21,7 +21,7 @@ pipeline {
         GKE_REGION = 'asia-northeast3'
         GKE_CLUSTER_NAME = 'travelmap-cluster'
 
-        NAMESPACE = "travelmap"
+        NAMESPACE = "travelmap-gke"
     }
 
     stages {
@@ -91,13 +91,15 @@ pipeline {
                         sh "gcloud container clusters get-credentials ${GKE_CLUSTER_NAME} --region ${GKE_REGION} --project ${GKE_PROJECT}"
                     }
                     def context = "gke_cogent-spirit-468810-j1_asia-northeast3_travelmap-cluster"
+                    sh "kubectl config use-context ${context}"
+                    // 네임스페이스가 없는 경우 생성
+                    sh "kubectl create namespace travelmap || true"
+
                     sh "kubectl apply -f /home/jenkins/k8s/secret.yaml -n ${NAMESPACE}"
                     sh "kubectl apply -f /home/jenkins/k8s/secret-external.yaml -n ${NAMESPACE}"
 
                     // Helm 배포
                     sh """
-                        kubectl config use-context ${context}
-    
                         helm upgrade --install travelmap ./helm/travelmap \\
                           --namespace ${NAMESPACE}  \\
                           --create-namespace \\

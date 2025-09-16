@@ -30,9 +30,9 @@ spec:
 
             # DB 환경 변수 설정
             - name: SPRING_DATASOURCE_URL
-              value: "jdbc:postgresql://{{ .Values.backend.env.DB_HOST }}:{{ .Values.backend.env.DB_PORT }}/travelmap"
+              value: "jdbc:postgresql://postgres.default.svc.cluster.local:5432/travelmap"
             - name: SPRING_DATASOURCE_USERNAME
-              value: "{{ .Values.backend.env.DB_USERNAME }}"
+              value: "travelmap"
             - name: SPRING_DATASOURCE_PASSWORD
               valueFrom:
                 secretKeyRef:

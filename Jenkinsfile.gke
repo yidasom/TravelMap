@@ -16,15 +16,12 @@ pipeline {
         FRONTEND_IMAGE_NAME = "somlh1212/travelmap-frontend:${FRONTEND_IMAGE_TAG}"
         FRONTEND_IMAGE_LATEST_NAME = "somlh1212/travelmap-frontend:latest"
 
-        // Node.js 빌드 시 메모리 제한 증가
-//        NODE_OPTIONS = "--max_old_space_size=4096"
-
         // GKE 정보
         GKE_PROJECT = 'cogent-spirit-468810-j1'
         GKE_REGION = 'asia-northeast3'
         GKE_CLUSTER_NAME = 'travelmap-cluster'
 
-        NAMESPACE = "travelmap-gke"
+        NAMESPACE = "travelmap"
     }
 
     stages {

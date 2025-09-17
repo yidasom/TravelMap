@@ -22,6 +22,9 @@ pipeline {
         GKE_CLUSTER_NAME = 'travelmap-cluster'
 
         NAMESPACE = "travelmap-gke"
+
+        // 빌드 시점에 환경변수 주입
+        REACT_APP_API_URL = "http://travelmap-backend:8080"
     }
 
     stages {

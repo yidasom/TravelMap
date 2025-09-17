@@ -34,7 +34,7 @@ frontend:
     type: LoadBalancer  # 외부용
     port: 80
   env:
-    - name: REACT_APP_BACKEND_URL
+    - name: REACT_APP_API_URL
       value: "http://travelmap-backend:8080"
   resources:
     requests:

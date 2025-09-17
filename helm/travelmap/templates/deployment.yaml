@@ -96,6 +96,11 @@ spec:
             - name: http
               containerPort: {{ .Values.frontend.service.port }}
               protocol: TCP
+          env:
+            {{- range .Values.frontend.env }}
+            - name: {{ .name }}
+              value: {{ .value | quote }}
+            {{- end }}
           livenessProbe:
             httpGet:
               path: /

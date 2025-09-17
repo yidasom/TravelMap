@@ -158,10 +158,6 @@ spec:
     - ReadWriteOnce
   resources:
     requests:
-      cpu: "100m"
-      memory: "256Mi"
-    limits:
-      cpu: "500m"
-      memory: "512Mi"
-  storageClassName: standard-rwo
+      storage: {{ .Values.db.persistence.size }}
+  storageClassName: {{ .Values.db.persistence.storageClass }}
 {{- end }}

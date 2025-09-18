@@ -68,22 +68,20 @@ pipeline {
             }
         }
 
-        stage('Prepare K8s Namespace & Secret') {
+        stage('Prepare Namespace & Secrets') {
             steps {
                 sh """
-                    kubectl --context=${K8S_CONTEXT} get ns ${NAMESPACE} || kubectl --context=${K8S_CONTEXT} create ns ${NAMESPACE}
-                    kubectl --context=${K8S_CONTEXT} apply -f /home/jenkins/k8s/secret.yaml -n ${NAMESPACE}
-                    kubectl --context=${K8S_CONTEXT} apply -f /home/jenkins/k8s/secret-external.yaml -n ${NAMESPACE}
+                  kubectl --context=${K8S_CONTEXT} apply -f /home/jenkins/k8s/secret.yaml -n ${NAMESPACE}
+                  kubectl --context=${K8S_CONTEXT} apply -f /home/jenkins/k8s/secret-external.yaml -n ${NAMESPACE}
                 """
             }
         }
 
-        stage('Deploy to K8s with Helm') {
+        stage('Deploy with Helm') {
             steps {
                 sh """
-                kubectl config use-context kubernetes-admin@kubernetes
-
-                helm upgrade --install travelmap ./helm/travelmap \\
+                  kubectl config use-context ${K8S_CONTEXT}
+                  helm upgrade --install travelmap ./helm/travelmap \\
                     --namespace ${NAMESPACE} \\
                     --create-namespace \\
                     -f ./helm/travelmap/values-k8s.yaml \\
@@ -92,6 +90,7 @@ pipeline {
                 """
             }
         }
+
 
         stage('Wait for Deployment Rollout') {
             steps {

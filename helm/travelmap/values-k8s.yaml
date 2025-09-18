@@ -1,4 +1,4 @@
-replicaCount: 2
+replicaCount: 1
 
 backend:
   image:
@@ -8,17 +8,22 @@ backend:
   service:
     type: ClusterIP # 내부용
     port: 8080
+  secrets:
+    dbPassword:
+      secretName: travelmap-external-secret
+      secretKey: db-password
+    youtubeApiKey:
+      secretName: travelmap-secret
+      secretKey: youtube-api-key
   env:
     SPRING_PROFILES_ACTIVE: prod
-    youtubeApiSecret: travelmap-secret
-    youtubeApiKey: youtube-api-key
   resources:
     requests:
-      cpu: "100m"
-      memory: "256Mi"
+      cpu: "500m"
+      memory: "1Gi"
     limits:
-      cpu: "200m"
-      memory: "512Mi"
+      cpu: "1000m"
+      memory: "2Gi"
 
 frontend:
   image:
@@ -28,24 +33,42 @@ frontend:
   service:
     type: LoadBalancer  # 외부용
     port: 80
+  env:
+    - name: REACT_APP_API_URL
+      value: "http://travelmap-backend:8080"
   resources:
     requests:
-      cpu: "50m"
-      memory: "128Mi"
+      cpu: "400m"
+      memory: "512Mi"
     limits:
-      cpu: "100m"
-      memory: "256Mi"
+      cpu: "800m"
+      memory: "1Gi"
 
 db:
+  enabled: true
   type: internal
-  host: postgres.default.svc.cluster.local
+  image:
+    repository: postgres
+    tag: "16"
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 5432
+  persistence:
+    enabled: true
+    size: 10Gi
+    storageClass: ""
+    subPath: ""
+  #  host: postgres.default.svc.cluster.local
   port: 5432
   username: travelmap
   password:
     secretName: travelmap-external-secret
     secretKey: db-password
 
-imagePullSecrets: []
+imagePullSecrets:
+  - name: dockerhub-credentials
+
 nameOverride: ""
 fullnameOverride: ""
 

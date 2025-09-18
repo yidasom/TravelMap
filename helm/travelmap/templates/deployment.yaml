@@ -176,3 +176,4 @@ spec:
       storage: {{ .Values.db.persistence.size }}
   storageClassName: {{ .Values.db.persistence.storageClass }}
 {{- end }}
+{{- end }}

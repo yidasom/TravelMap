@@ -148,7 +148,12 @@ spec:
             volumeMounts:
               - name: postgres-storage
                 mountPath: /var/lib/postgresql/data
-                subPath: {{- if and .Values.local .Values.local.enabled }}""{{- else }}{{ .Values.db.persistence.subPath | default "" }}{{- end }}
+                { { - if and .Values.local .Values.local.enabled } }
+                subPath: ""
+                { { - else } }
+                subPath: { { .Values.db.persistence.subPath | default "" } }
+                { { - end } }
+
       volumes:
         - name: postgres-storage
           {{- if and .Values.local .Values.local.enabled }}

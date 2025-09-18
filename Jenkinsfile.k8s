@@ -81,6 +81,7 @@ pipeline {
             steps {
                 sh """
                   kubectl config use-context ${K8S_CONTEXT}
+                  kubectl create namespace ${NAMESPACE} || true
                   helm upgrade --install travelmap ./helm/travelmap \\
                     --namespace ${NAMESPACE} \\
                     --create-namespace \\

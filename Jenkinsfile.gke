@@ -24,7 +24,7 @@ pipeline {
         NAMESPACE = "travelmap-gke"
 
         // 빌드 시점에 환경변수 주입
-        REACT_APP_API_URL = "http://travelmap-backend:8080"
+//        REACT_APP_API_URL = "http://travelmap-backend:8080"
     }
 
     stages {
@@ -66,8 +66,12 @@ pipeline {
             steps {
                 dir('frontend') {
                     // npm 의존성 설치 및 빌드
-                    sh 'npm install'
-                    sh 'npm run build'
+                    sh '''
+                        echo ">> REACT_APP_API_URL=${REACT_APP_API_URL}"
+                        export REACT_APP_API_URL=${REACT_APP_API_URL}
+                        npm install
+                        npm run build
+                    '''
                 }
             }
         }

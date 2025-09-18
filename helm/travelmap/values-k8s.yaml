@@ -7,7 +7,7 @@ backend:
     pullPolicy: Always
   service:
     type: ClusterIP # 내부용
-    port: 8080
+    port: 8081
   secrets:
     dbPassword:
       secretName: travelmap-external-secret

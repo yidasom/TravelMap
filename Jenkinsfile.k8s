@@ -22,7 +22,7 @@ pipeline {
         K8S_CONTEXT = "kubernetes-admin@kubernetes"
         NAMESPACE = "travelmap-k8s"
 
-        REACT_APP_API_URL = "http://travelmap-backend:8080"
+        REACT_APP_API_URL = "http://travelmap-backend.travelmap-k8s.svc.cluster.local:8081"
     }
 
     stages {
@@ -71,8 +71,8 @@ pipeline {
         stage('Prepare Namespace & Secrets') {
             steps {
                 sh """
-                  kubectl --context=${K8S_CONTEXT} apply -f /home/jenkins/k8s/secret.yaml -n ${NAMESPACE}
-                  kubectl --context=${K8S_CONTEXT} apply -f /home/jenkins/k8s/secret-external.yaml -n ${NAMESPACE}
+                  kubectl apply -f /home/jenkins/k8s/secret.yaml -n ${NAMESPACE}
+                  kubectl apply -f /home/jenkins/k8s/secret-external.yaml -n ${NAMESPACE}
                 """
             }
         }
@@ -81,12 +81,11 @@ pipeline {
             steps {
                 sh """
                   kubectl config use-context ${K8S_CONTEXT}
-                  kubectl create namespace ${NAMESPACE} || true
-                  helm upgrade --install travelmap ./helm/travelmap \\
-                    --namespace ${NAMESPACE} \\
-                    --create-namespace \\
-                    -f ./helm/travelmap/values-k8s.yaml \\
-                    --set backend.image.tag=${BACKEND_IMAGE_TAG} \\
+                  helm upgrade --install travelmap ./helm/travelmap \
+                    --namespace ${NAMESPACE} \
+                    --create-namespace \
+                    -f ./helm/travelmap/values-k8s.yaml \
+                    --set backend.image.tag=${BACKEND_IMAGE_TAG} \
                     --set frontend.image.tag=${FRONTEND_IMAGE_TAG}
                 """
             }

@@ -21,6 +21,8 @@ pipeline {
         // Kubernetes context
         K8S_CONTEXT = "kubernetes-admin@kubernetes"
         NAMESPACE = "travelmap-k8s"
+
+        REACT_APP_API_URL = "http://travelmap-backend:8080"
     }
 
     stages {
@@ -37,11 +39,12 @@ pipeline {
             steps {
                 dir('backend') {
                     sh """
-                        docker buildx build --platform linux/arm64,linux/amd64 \\
-                            -t ${BACKEND_IMAGE_NAME} \\
-                            -t ${BACKEND_IMAGE_LATEST_NAME} \\
-                            --push .
-                        """
+                    docker buildx build \\
+                      --platform linux/arm64,linux/amd64 \\
+                      -t ${BACKEND_IMAGE_NAME} \\
+                      -t ${BACKEND_IMAGE_LATEST_NAME} \\
+                      --push .
+                    """
                 }
             }
         }
@@ -49,8 +52,12 @@ pipeline {
         stage('Build & Push Frontend Docker Image') {
             steps {
                 dir('frontend') {
-                    sh 'npm install'
-                    sh 'npm run build'
+                    sh '''
+                        echo ">> REACT_APP_API_URL=${REACT_APP_API_URL}"
+                        export REACT_APP_API_URL=${REACT_APP_API_URL}
+                        npm install
+                        npm run build
+                    '''
                     sh """
                         docker buildx build --platform linux/arm64,linux/amd64 \\
                             -t ${FRONTEND_IMAGE_NAME} \\

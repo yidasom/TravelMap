@@ -66,6 +66,9 @@ db:
     secretName: travelmap-external-secret
     secretKey: db-password
 
+local:
+  enabled: false
+
 imagePullSecrets:
   - name: dockerhub-credentials
 

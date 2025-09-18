@@ -148,14 +148,10 @@ spec:
             volumeMounts:
               - name: postgres-storage
                 mountPath: /var/lib/postgresql/data
-                {{- if .Values.local.enabled }}
-                subPath: ""
-                {{- else }}
-                subPath: {{ .Values.db.persistence.subPath | default "" }}
-                {{- end }}
+                subPath: {{- if and .Values.local .Values.local.enabled }}""{{- else }}{{ .Values.db.persistence.subPath | default "" }}{{- end }}
       volumes:
         - name: postgres-storage
-          {{- if .Values.local.enabled }}
+          {{- if and .Values.local .Values.local.enabled }}
           emptyDir: {}
           {{- else }}
           persistentVolumeClaim:
@@ -163,7 +159,8 @@ spec:
           {{- end }}
 
 ---
-{{- if and .Values.db.enabled (not .Values.local.enabled) }}
+
+{{- if and .Values.db.enabled (or (not .Values.local) (not .Values.local.enabled)) }}
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:

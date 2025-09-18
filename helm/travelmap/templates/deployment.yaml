@@ -149,7 +149,6 @@ spec:
               - name: postgres-storage
                 mountPath: /var/lib/postgresql/data
                 {{- if .Values.local.enabled }}
-                # 로컬이면 emptyDir
                 subPath: ""
                 {{- else }}
                 subPath: {{ .Values.db.persistence.subPath | default "" }}

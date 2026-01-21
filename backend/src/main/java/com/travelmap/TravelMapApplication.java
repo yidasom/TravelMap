@@ -19,6 +19,6 @@ public class TravelMapApplication implements CommandLineRunner {
 
 	@Override
 	public void run(String... args) throws Exception {
-		System.out.println("youtube.api.application-name = " + applicationName);
+		// System.out.println("youtube.api.application-name = " + applicationName);
 	}
 }

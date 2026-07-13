@@ -8,6 +8,8 @@ const initialState: AppState = {
   filterOptions: null,
   mapData: null,
   videos: [],
+  videosPage: 0,
+  hasMoreVideos: false,
   selectedVideo: null,
   loading: false,
   error: null,
@@ -30,8 +32,9 @@ export const fetchMapData = createAsyncThunk(
 
 export const fetchVideos = createAsyncThunk(
   'app/fetchVideos',
-  async ({ filters, page = 0, size = 20 }: { filters: FilterState; page?: number; size?: number }) => {
-    return await apiService.getVideos(filters, page, size);
+  async ({ filters, page = 0, size = 20, append = false }: { filters: FilterState; page?: number; size?: number; append?: boolean }) => {
+    const videos = await apiService.getVideos(filters, page, size);
+    return { videos, page, size, append };
   }
 );
 
@@ -77,6 +80,8 @@ const appSlice = createSlice({
     // 비디오 목록 리셋
     resetVideos: (state) => {
       state.videos = [];
+      state.videosPage = 0;
+      state.hasMoreVideos = false;
     },
   },
   extraReducers: (builder) => {
@@ -118,7 +123,10 @@ const appSlice = createSlice({
       })
       .addCase(fetchVideos.fulfilled, (state, action) => {
         state.loading = false;
-        state.videos = action.payload;
+        const { videos, page, size, append } = action.payload;
+        state.videos = append ? [...state.videos, ...videos] : videos;
+        state.videosPage = page;
+        state.hasMoreVideos = videos.length === size;
       })
       .addCase(fetchVideos.rejected, (state, action) => {
         state.loading = false;
@@ -149,6 +157,8 @@ const appSlice = createSlice({
       .addCase(fetchVideosByCountry.fulfilled, (state, action) => {
         state.loading = false;
         state.videos = action.payload;
+        state.videosPage = 0;
+        state.hasMoreVideos = false;
       })
       .addCase(fetchVideosByCountry.rejected, (state, action) => {
         state.loading = false;

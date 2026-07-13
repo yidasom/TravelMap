@@ -28,6 +28,7 @@ import FilterPanel from './components/FilterPanel';
 import WorldMap from './components/WorldMap';
 import VideoList from './components/VideoList';
 import DataCollectionPanel from './components/DataCollectionPanel';
+import KeywordManagementPanel from './components/KeywordManagementPanel';
 import { FilterState, Video } from './types';
 
 // Material-UI 테마 설정
@@ -58,6 +59,8 @@ const MainApp: React.FC = () => {
     filterOptions,
     mapData,
     videos,
+    videosPage,
+    hasMoreVideos,
     loading,
     error,
   } = useAppSelector((state) => state.app);
@@ -102,6 +105,11 @@ const MainApp: React.FC = () => {
   const handleCountryClick = (countryCode: string) => {
     const newFilters = { ...filters, selectedCountryCode: countryCode };
     dispatch(updateFilters(newFilters));
+  };
+
+  // 영상 더 보기 핸들러
+  const handleLoadMoreVideos = () => {
+    dispatch(fetchVideos({ filters, page: videosPage + 1, append: true }));
   };
 
   // 영상 클릭 핸들러
@@ -157,6 +165,9 @@ const MainApp: React.FC = () => {
         {/* 데이터 수집 관리 패널 */}
         <DataCollectionPanel onDataUpdated={handleDataUpdated} />
 
+        {/* 국가/도시 키워드 관리 패널 */}
+        <KeywordManagementPanel />
+
         {/* 지도 영역 */}
         <Box sx={{ mb: 4 }}>
           <Typography variant="h5" sx={{ mb: 2, fontWeight: 600 }}>
@@ -211,6 +222,8 @@ const MainApp: React.FC = () => {
             onVideoClick={handleVideoClick}
             loading={loading}
             error={error}
+            hasMore={hasMoreVideos}
+            onLoadMore={handleLoadMoreVideos}
           />
         </Box>
 

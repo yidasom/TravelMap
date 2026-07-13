@@ -7,7 +7,6 @@ import com.travelmap.entity.VisitCountry;
 import com.travelmap.repository.UserRepository;
 import com.travelmap.repository.VideoRepository;
 import com.travelmap.repository.VisitCountryRepository;
-import com.travelmap.service.DataCollectionService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,27 +18,27 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * 지도/영상 조회용 읽기 전용 엔드포인트. 데이터 수집 관리(어드민) 쪽은 {@link AdminController}에서 담당한다.
+ */
 @RestController
 @RequestMapping("/api")
 @CrossOrigin(origins = "*")
 public class TravelMapController {
-    
+
     private static final Logger logger = LoggerFactory.getLogger(TravelMapController.class);
-    
+
     private final UserRepository userRepository;
     private final VideoRepository videoRepository;
     private final VisitCountryRepository visitCountryRepository;
-    private final DataCollectionService dataCollectionService;
-    
+
     @Autowired
     public TravelMapController(UserRepository userRepository,
                               VideoRepository videoRepository,
-                              VisitCountryRepository visitCountryRepository,
-                              DataCollectionService dataCollectionService) {
+                              VisitCountryRepository visitCountryRepository) {
         this.userRepository = userRepository;
         this.videoRepository = videoRepository;
         this.visitCountryRepository = visitCountryRepository;
-        this.dataCollectionService = dataCollectionService;
     }
     
     /**
@@ -85,15 +84,18 @@ public class TravelMapController {
     public ResponseEntity<MapDataDto> getMapData(
             @RequestParam(required = false) Long userId,
             @RequestParam(required = false) String countryCode,
+            @RequestParam(required = false) String continent,
+            @RequestParam(required = false) Integer year,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate) {
-        
-        logger.info("지도 데이터 요청: userId={}, countryCode={}, startDate={}, endDate={}", 
-                   userId, countryCode, startDate, endDate);
-        
+
+        logger.info("지도 데이터 요청: userId={}, countryCode={}, continent={}, year={}, startDate={}, endDate={}",
+                   userId, countryCode, continent, year, startDate, endDate);
+
         try {
             // 필터링된 방문 국가 데이터 조회
-            List<VisitCountry> visitCountries = visitCountryRepository.findByFilters(userId, countryCode);
+            List<VisitCountry> visitCountries = visitCountryRepository.findByFilters(
+                    userId, countryCode, continent, year, startDate, endDate);
             
             // 국가별 집계
             Map<String, List<VisitCountry>> countryGroups = visitCountries.stream()
@@ -152,16 +154,18 @@ public class TravelMapController {
     public ResponseEntity<List<VideoDto>> getVideos(
             @RequestParam(required = false) Long userId,
             @RequestParam(required = false) String countryCode,
+            @RequestParam(required = false) String continent,
+            @RequestParam(required = false) Integer year,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
-        
-        logger.info("영상 목록 요청: userId={}, countryCode={}, page={}, size={}", 
-                   userId, countryCode, page, size);
-        
+
+        logger.info("영상 목록 요청: userId={}, countryCode={}, continent={}, year={}, page={}, size={}",
+                   userId, countryCode, continent, year, page, size);
+
         try {
-            List<Video> videos = videoRepository.findByFilters(userId, countryCode, startDate, endDate);
+            List<Video> videos = videoRepository.findByFilters(userId, countryCode, continent, year, startDate, endDate);
             
             // 업로드 날짜 기준 내림차순 정렬
             videos.sort((a, b) -> {
@@ -234,108 +238,6 @@ public class TravelMapController {
         } catch (Exception e) {
             logger.error("국가별 영상 조회 오류", e);
             return ResponseEntity.internalServerError().build();
-        }
-    }
-    
-    /**
-     * 전체 데이터 수집 시작
-     */
-    @PostMapping("/admin/collect-all")
-    public ResponseEntity<Map<String, Object>> collectAllData() {
-        logger.info("전체 데이터 수집 요청");
-        
-        try {
-            Map<String, Object> result = dataCollectionService.collectAllData();
-            return ResponseEntity.ok(result);
-        } catch (Exception e) {
-            logger.error("전체 데이터 수집 API 오류", e);
-            return ResponseEntity.internalServerError()
-                    .body(Map.of("status", "error", "message", "서버 오류가 발생했습니다."));
-        }
-    }
-    
-    /**
-     * 특정 채널 데이터 수집
-     */
-    @PostMapping("/admin/collect-channel")
-    public ResponseEntity<Map<String, Object>> collectChannelData(@RequestParam String searchQuery) {
-        logger.info("특정 채널 데이터 수집 요청: {}", searchQuery);
-        
-        try {
-            Map<String, Object> result = dataCollectionService.collectChannelData(searchQuery);
-            return ResponseEntity.ok(result);
-        } catch (Exception e) {
-            logger.error("특정 채널 데이터 수집 API 오류", e);
-            return ResponseEntity.internalServerError()
-                    .body(Map.of("status", "error", "message", "서버 오류가 발생했습니다."));
-        }
-    }
-    
-    /**
-     * 전체 채널 데이터 업데이트
-     */
-    @PostMapping("/admin/update-all")
-    public ResponseEntity<Map<String, Object>> updateAllChannelsData() {
-        logger.info("전체 채널 데이터 업데이트 요청");
-        
-        try {
-            Map<String, Object> result = dataCollectionService.updateAllChannelsData();
-            return ResponseEntity.ok(result);
-        } catch (Exception e) {
-            logger.error("전체 채널 데이터 업데이트 API 오류", e);
-            return ResponseEntity.internalServerError()
-                    .body(Map.of("status", "error", "message", "서버 오류가 발생했습니다."));
-        }
-    }
-    
-    /**
-     * 처리되지 않은 영상들 처리
-     */
-    @PostMapping("/admin/process-unprocessed")
-    public ResponseEntity<Map<String, Object>> processUnprocessedVideos() {
-        logger.info("처리되지 않은 영상들 처리 요청");
-        
-        try {
-            Map<String, Object> result = dataCollectionService.processUnprocessedVideos();
-            return ResponseEntity.ok(result);
-        } catch (Exception e) {
-            logger.error("처리되지 않은 영상들 처리 API 오류", e);
-            return ResponseEntity.internalServerError()
-                    .body(Map.of("status", "error", "message", "서버 오류가 발생했습니다."));
-        }
-    }
-    
-    /**
-     * 수집 상태 조회
-     */
-    @GetMapping("/admin/collection-status")
-    public ResponseEntity<Map<String, Object>> getCollectionStatus() {
-        try {
-            Map<String, Object> status = dataCollectionService.getCollectionStatus();
-            return ResponseEntity.ok(status);
-        } catch (Exception e) {
-            logger.error("수집 상태 조회 API 오류", e);
-            return ResponseEntity.internalServerError()
-                    .body(Map.of("status", "error", "message", "서버 오류가 발생했습니다."));
-        }
-    }
-    
-    /**
-     * 새 채널 추가
-     */
-    @PostMapping("/admin/add-channel")
-    public ResponseEntity<Map<String, Object>> addNewChannel(
-            @RequestParam String searchQuery,
-            @RequestParam(required = false) String channelName) {
-        logger.info("새 채널 추가 요청: {} ({})", channelName, searchQuery);
-        
-        try {
-            Map<String, Object> result = dataCollectionService.addNewChannel(searchQuery, channelName);
-            return ResponseEntity.ok(result);
-        } catch (Exception e) {
-            logger.error("새 채널 추가 API 오류", e);
-            return ResponseEntity.internalServerError()
-                    .body(Map.of("status", "error", "message", "서버 오류가 발생했습니다."));
         }
     }
     

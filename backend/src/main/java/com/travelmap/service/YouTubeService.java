@@ -128,6 +128,52 @@ public class YouTubeService {
     }
     
     /**
+     * 채널 ID로 직접 채널 정보 갱신 (검색 없이 channels().list 사용)
+     */
+    public User refreshChannelInfo(String channelId) throws IOException {
+        logger.info("채널 정보 갱신 시작: {}", channelId);
+
+        User user = userRepository.findByYoutubeChannelId(channelId)
+                .orElseThrow(() -> new RuntimeException("채널 정보를 먼저 저장해야 합니다: " + channelId));
+
+        YouTube.Channels.List channelRequest = youtube.channels().list(Collections.singletonList("snippet,statistics"));
+        channelRequest.setId(Collections.singletonList(channelId));
+        channelRequest.setKey(apiKey);
+
+        ChannelListResponse response = channelRequest.execute();
+        List<Channel> channels = response.getItems();
+
+        if (channels.isEmpty()) {
+            throw new RuntimeException("채널 정보를 가져올 수 없습니다: " + channelId);
+        }
+
+        Channel channel = channels.get(0);
+        ChannelSnippet snippet = channel.getSnippet();
+        ChannelStatistics statistics = channel.getStatistics();
+
+        user.setName(snippet.getTitle());
+        user.setDescription(snippet.getDescription());
+
+        if (snippet.getThumbnails() != null && snippet.getThumbnails().getDefault() != null) {
+            user.setProfileImageUrl(snippet.getThumbnails().getDefault().getUrl());
+        }
+
+        if (statistics != null) {
+            user.setSubscriberCount(statistics.getSubscriberCount() != null ?
+                statistics.getSubscriberCount().longValue() : 0L);
+            user.setTotalViewCount(statistics.getViewCount() != null ?
+                statistics.getViewCount().longValue() : 0L);
+            user.setTotalVideoCount(statistics.getVideoCount() != null ?
+                statistics.getVideoCount().longValue() : 0L);
+        }
+
+        User savedUser = userRepository.save(user);
+        logger.info("채널 정보 갱신 완료: {} ({})", savedUser.getName(), savedUser.getId());
+
+        return savedUser;
+    }
+
+    /**
      * 채널의 최신 영상들을 가져와서 저장
      */
     public List<Video> saveChannelVideos(String channelId, int maxResults) throws IOException {

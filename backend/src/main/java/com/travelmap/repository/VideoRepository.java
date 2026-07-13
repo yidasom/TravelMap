@@ -36,10 +36,14 @@ public interface VideoRepository extends JpaRepository<Video, Long> {
     @Query("SELECT v FROM Video v JOIN v.user u JOIN v.visitCountries vc " +
        "WHERE (COALESCE(:userId, u.id) = u.id) " +
        "AND (COALESCE(:countryCode, vc.countryCode) = vc.countryCode) " +
+       "AND (:continent IS NULL OR vc.continent = :continent) " +
+       "AND (:year IS NULL OR YEAR(v.uploadDate) = :year) " +
        "AND (COALESCE(:startDate, v.uploadDate) <= v.uploadDate) " +
        "AND (COALESCE(:endDate, v.uploadDate) >= v.uploadDate)")
     List<Video> findByFilters(@Param("userId") Long userId,
                           @Param("countryCode") String countryCode,
+                          @Param("continent") String continent,
+                          @Param("year") Integer year,
                           @Param("startDate") LocalDateTime startDate,
                           @Param("endDate") LocalDateTime endDate);
 

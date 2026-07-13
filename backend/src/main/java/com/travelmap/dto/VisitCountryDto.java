@@ -8,18 +8,24 @@ public class VisitCountryDto {
     private String countryName;
     private String countryEmoji;
     private String continent;
+    private String cityName;
+    private Double cityLatitude;
+    private Double cityLongitude;
     private String detectionMethod;
     private Double confidenceScore;
     private Integer visitOrder;
-    
+
     public VisitCountryDto() {}
-    
+
     public VisitCountryDto(VisitCountry visitCountry) {
         this.id = visitCountry.getId();
         this.countryCode = visitCountry.getCountryCode();
         this.countryName = visitCountry.getCountryName();
         this.countryEmoji = visitCountry.getCountryEmoji();
         this.continent = visitCountry.getContinent();
+        this.cityName = visitCountry.getCityName();
+        this.cityLatitude = visitCountry.getCityLatitude();
+        this.cityLongitude = visitCountry.getCityLongitude();
         this.detectionMethod = visitCountry.getDetectionMethod();
         this.confidenceScore = visitCountry.getConfidenceScore();
         this.visitOrder = visitCountry.getVisitOrder();
@@ -65,7 +71,31 @@ public class VisitCountryDto {
     public void setContinent(String continent) {
         this.continent = continent;
     }
-    
+
+    public String getCityName() {
+        return cityName;
+    }
+
+    public void setCityName(String cityName) {
+        this.cityName = cityName;
+    }
+
+    public Double getCityLatitude() {
+        return cityLatitude;
+    }
+
+    public void setCityLatitude(Double cityLatitude) {
+        this.cityLatitude = cityLatitude;
+    }
+
+    public Double getCityLongitude() {
+        return cityLongitude;
+    }
+
+    public void setCityLongitude(Double cityLongitude) {
+        this.cityLongitude = cityLongitude;
+    }
+
     public String getDetectionMethod() {
         return detectionMethod;
     }

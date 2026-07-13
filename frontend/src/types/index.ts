@@ -32,9 +32,34 @@ export interface VisitCountry {
   countryName: string;
   countryEmoji?: string;
   continent?: string;
+  cityName?: string;
+  cityLatitude?: number;
+  cityLongitude?: number;
   detectionMethod: string;
   confidenceScore?: number;
   visitOrder?: number;
+}
+
+// Country/City Keyword Types (영상 제목에서 국가/도시를 감지할 때 쓰는 키워드 - 관리자 API로 추가/삭제)
+export interface CountryKeyword {
+  id: number;
+  keyword: string;
+  countryCode: string;
+  countryName: string;
+  continent?: string;
+  countryEmoji?: string;
+}
+
+export interface CityKeyword {
+  id: number;
+  keyword: string;
+  cityName: string;
+  latitude: number;
+  longitude: number;
+  countryCode: string;
+  countryName: string;
+  continent?: string;
+  countryEmoji?: string;
 }
 
 // Filter Options Types
@@ -83,6 +108,8 @@ export interface AppState {
   filterOptions: FilterOptions | null;
   mapData: MapData | null;
   videos: Video[];
+  videosPage: number;
+  hasMoreVideos: boolean;
   selectedVideo: Video | null;
   loading: boolean;
   error: string | null;

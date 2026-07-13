@@ -25,9 +25,18 @@ public class VisitCountry {
     
     @Column(name = "country_emoji", length = 10)
     private String countryEmoji;
-    
+
     @Column(name = "continent", length = 50)
     private String continent;
+
+    @Column(name = "city_name", length = 100)
+    private String cityName;
+
+    @Column(name = "city_latitude")
+    private Double cityLatitude;
+
+    @Column(name = "city_longitude")
+    private Double cityLongitude;
     
     @Column(name = "detection_method", length = 20)
     private String detectionMethod; // "TITLE_EMOJI", "OCR", "MANUAL"
@@ -111,7 +120,31 @@ public class VisitCountry {
     public void setContinent(String continent) {
         this.continent = continent;
     }
-    
+
+    public String getCityName() {
+        return cityName;
+    }
+
+    public void setCityName(String cityName) {
+        this.cityName = cityName;
+    }
+
+    public Double getCityLatitude() {
+        return cityLatitude;
+    }
+
+    public void setCityLatitude(Double cityLatitude) {
+        this.cityLatitude = cityLatitude;
+    }
+
+    public Double getCityLongitude() {
+        return cityLongitude;
+    }
+
+    public void setCityLongitude(Double cityLongitude) {
+        this.cityLongitude = cityLongitude;
+    }
+
     public String getDetectionMethod() {
         return detectionMethod;
     }

@@ -8,15 +8,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 
+// 클래스 레벨 @Transactional을 의도적으로 두지 않음: 배치 루프(collectAllData/updateAllChannelsData/
+// processUnprocessedVideos) 안에서 개별 항목이 실패해도 해당 항목만 롤백되고 나머지는 계속 처리되어야 하는데,
+// 전체를 하나의 트랜잭션으로 묶으면 내부에서 던져진 런타임 예외가 트랜잭션을 rollback-only로 표시해서
+// try/catch로 잡아도 최종 커밋 시 UnexpectedRollbackException이 발생한다.
 @Service
-@Transactional
 public class DataCollectionService {
     
     private static final Logger logger = LoggerFactory.getLogger(DataCollectionService.class);
@@ -164,7 +166,7 @@ public class DataCollectionService {
                     currentStatus = String.format("채널 업데이트 중: %s", user.getName());
                     
                     // 채널 정보 재수집
-                    youTubeService.saveChannelInfo(user.getYoutubeChannelId());
+                    youTubeService.refreshChannelInfo(user.getYoutubeChannelId());
                     
                     // 최신 영상 추가 수집
                     youTubeService.saveChannelVideos(user.getYoutubeChannelId(), 20);

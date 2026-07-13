@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { FilterOptions, MapData, Video, FilterState } from '../types';
+import { FilterOptions, MapData, Video, FilterState, CountryKeyword, CityKeyword } from '../types';
 
 // API 기본 설정
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8080/api';
@@ -23,12 +23,18 @@ export const apiService = {
   // 지도 데이터 조회
   async getMapData(filters: FilterState): Promise<MapData> {
     const params = new URLSearchParams();
-    
+
     if (filters.selectedUserId) {
       params.append('userId', filters.selectedUserId.toString());
     }
     if (filters.selectedCountryCode) {
       params.append('countryCode', filters.selectedCountryCode);
+    }
+    if (filters.selectedContinent) {
+      params.append('continent', filters.selectedContinent);
+    }
+    if (filters.selectedYear) {
+      params.append('year', filters.selectedYear);
     }
     if (filters.startDate) {
       params.append('startDate', filters.startDate);
@@ -44,12 +50,18 @@ export const apiService = {
   // 영상 목록 조회
   async getVideos(filters: FilterState, page: number = 0, size: number = 20): Promise<Video[]> {
     const params = new URLSearchParams();
-    
+
     if (filters.selectedUserId) {
       params.append('userId', filters.selectedUserId.toString());
     }
     if (filters.selectedCountryCode) {
       params.append('countryCode', filters.selectedCountryCode);
+    }
+    if (filters.selectedContinent) {
+      params.append('continent', filters.selectedContinent);
+    }
+    if (filters.selectedYear) {
+      params.append('year', filters.selectedYear);
     }
     if (filters.startDate) {
       params.append('startDate', filters.startDate);
@@ -57,7 +69,7 @@ export const apiService = {
     if (filters.endDate) {
       params.append('endDate', filters.endDate);
     }
-    
+
     params.append('page', page.toString());
     params.append('size', size.toString());
 
@@ -124,6 +136,37 @@ export const dataCollectionApi = {
       params: Object.fromEntries(params)
     });
     return response;
+  },
+};
+
+// 국가/도시 감지 키워드 관리 API
+export const keywordApi = {
+  async getCountryKeywords(): Promise<CountryKeyword[]> {
+    const response = await api.get<CountryKeyword[]>('/admin/keywords/countries');
+    return response.data;
+  },
+
+  async addCountryKeyword(data: Omit<CountryKeyword, 'id'>): Promise<CountryKeyword> {
+    const response = await api.post<CountryKeyword>('/admin/keywords/countries', data);
+    return response.data;
+  },
+
+  async deleteCountryKeyword(id: number): Promise<void> {
+    await api.delete(`/admin/keywords/countries/${id}`);
+  },
+
+  async getCityKeywords(): Promise<CityKeyword[]> {
+    const response = await api.get<CityKeyword[]>('/admin/keywords/cities');
+    return response.data;
+  },
+
+  async addCityKeyword(data: Omit<CityKeyword, 'id'>): Promise<CityKeyword> {
+    const response = await api.post<CityKeyword>('/admin/keywords/cities', data);
+    return response.data;
+  },
+
+  async deleteCityKeyword(id: number): Promise<void> {
+    await api.delete(`/admin/keywords/cities/${id}`);
   },
 };
 

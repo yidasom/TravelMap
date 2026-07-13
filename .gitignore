@@ -174,3 +174,5 @@ application-dev.yml
 Settings.md
 
 ddl_script.sql
+.omc/
+backend/.omc/
